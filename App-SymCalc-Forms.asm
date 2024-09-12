@@ -132,7 +132,7 @@ menmaitxtx  db "Coming soon...",0
 prgtxtinf   dw prgtxtinf1,4*1+2,prgtxtinf2,4*1+2,prgtxtinf3,4*1+2,0,prgicnbig,prgicn16c
 prgtxtinf1  db "SymCalc Spreadsheet",0
 prgtxtinf2  db " Version 0.8 (Build "
-read "..\..\..\..\SVN-Main\trunk\build.asm"
+read "..\..\..\SRC-Main\build.asm"
             db "pdt)",0
 prgtxtinf3  db " Copyright <c> 2024 SymbiosiS"
 prgtxtinf0  db 0

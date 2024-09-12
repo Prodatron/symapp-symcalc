@@ -3,7 +3,7 @@ nolist
 org #1000
 
 WRITE "f:\symbos\apps\symcalc\symcalc.ex2"
-READ "..\..\..\..\SVN-Main\trunk\SymbOS-Constants.asm"
+READ "..\..\..\SRC-Main\SymbOS-Constants.asm"
 READ "App-SymCalc-Structs.asm"
 
 relocate_start
@@ -75,7 +75,7 @@ use_SySystem_SYSWRN     equ 0   ;Opens an info, warning or confirm box
 use_SySystem_SELOPN     equ 0   ;Opens the file selection dialogue
 use_SySystem_HLPOPN     equ 0   ;HLP file handling
 
-READ "..\..\..\..\SVN-Main\trunk\Docs-Developer\symbos_lib-SystemManager.asm"
+READ "..\..\..\SRC-Main\Docs-Developer\symbos_lib-SystemManager.asm"
 READ "App-SymCalc-CellText.asm"
 
 App_EndTrns
