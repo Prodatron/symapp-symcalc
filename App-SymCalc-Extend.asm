@@ -347,8 +347,8 @@ hshini1 ld e,l:ld d,h
         ret
 
 ;### HSHADR -> returns the hash table address
-;### Input      L,H=position
-;### Output     C,B=position, HL=hash table address
+;### Input      L,H=column/row
+;### Output     C,B=column/row, HL=hash table address
 ;### Destroyed  AF
 hshadr  ld c,l:ld b,h
         ld a,l              ;1
@@ -358,12 +358,12 @@ hshadr  ld c,l:ld b,h
         ld a,h              ;1
         and #0f             ;2
         or l                ;1
-        ld l,a              ;1
+        ld l,a              ;1  l=has value
 hshadr1 ld h,0              ;2
         ret
 
 ;### HSHNEW -> adds a hash entry for a cell
-;### Input      L,H=position, DE=cell adr
+;### Input      L,H=column/row, DE=cell adr
 ;### Destroyed  AF,BC,DE,HL
 hshnew  push de
         push hl
@@ -413,7 +413,7 @@ hshnew6 pop de
         jr hshnew3
 
 ;### HSHREM -> removes a hash entry for a cell
-;### Input      L,H=position
+;### Input      L,H=column/row
 ;### Destroyed  AF,BC,DE,HL
 hshrem  call hshadr
         ld a,(hl)
@@ -470,7 +470,7 @@ hshrem6 ld a,(hl):inc hl
         ret
 
 ;### HSHUPD -> changes cell address
-;### Input      L,H=position, DE=cell adr
+;### Input      L,H=column/row, DE=cell adr
 ;### Destroyed  AF,BC,DE,HL
 hshupd  ld (hshupd3+1),de
         call hshadr
@@ -496,7 +496,7 @@ hshupd3 ld de,0
         jp jmp_bnkret
 
 ;### HSHFND -> check if there is a cell at field position
-;### Input      L,H=position
+;### Input      L,H=column/row
 ;### Output     E=0 -> no cell, HL=0
 ;###            E=1 -> HL=cell data record
 ;### Destroyed  AF,BC,D,IX
@@ -504,12 +504,12 @@ hshfnd  call hshadr
         ld a,(hl)           ;2
         or a                ;1
         jr z,hshfnd4        ;2
-        ld ixl,a            ;2
+        ld ixl,a            ;2      ixl=bucket size (##!!## remove after tests)
         inc h               ;1
         ld a,(hl)           ;2
         inc h               ;1
         ld h,(hl)           ;2
-        ld l,a              ;1      hl=bucket adr
+        ld l,a              ;1      hl=adr of first bucket entry
         ld de,4-1           ;3 34
 
 hshfnd1 ld a,(hl):inc hl    ;4
@@ -518,8 +518,8 @@ hshfnd1 ld a,(hl):inc hl    ;4
         ld a,(hl)           ;2
         cp b                ;1
         jr z,hshfnd3        ;2/3 -> 5/6
-hshfnd2 dec ixl             ;2
-        jr z,hshfnd4        ;2
+hshfnd2 dec ixl             ;2      (##!!## remove after tests)
+        jr z,hshfnd4        ;2      (##!!## excepetion call for integrity tests)
         add hl,de           ;3
         ld a,(hl):inc hl    ;4
         ld h,(hl):ld l,a    ;3

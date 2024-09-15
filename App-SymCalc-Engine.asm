@@ -2611,7 +2611,7 @@ reccelg inc l
         ld a,b
         cp h
         jr nc,reccelf
-        pop hl                  ;all cells ins range are unmarked -> check next
+        pop hl                  ;all cells in range are unmarked -> check next
         pop af
         sub 16
         jr nz,reccele
@@ -2674,7 +2674,6 @@ recstkpos   db 0
 recstkmem   ds 2*recstkmax
 
 recref  ld a,1
-ds 2
         ld (recstkpos),a
         ld (recstkmem),hl
 recrefc ld hl,recstkpos
