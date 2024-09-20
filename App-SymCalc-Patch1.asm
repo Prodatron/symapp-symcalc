@@ -17,6 +17,7 @@ dw hshrem
 dw hshupd
 dw hshfnd
 dw prgstk2
+dw prgstk2a
 dw guijmp
 dw barmem
 dw barini0

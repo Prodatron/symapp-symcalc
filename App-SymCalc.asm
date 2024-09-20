@@ -6,6 +6,11 @@
 ;@                                                                            @
 ;@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+;- (WIP) import/export CSV, SYLK
+
+;- dialogues (wingrp) with wrong esc/ok keys
+;- properties up/down missing
+
 ;cell texts -> 2nd bank
 ;- cellod3 -> copy from 2nd
 ;- celsav  -> copy to 2nd, compare old/new
@@ -40,7 +45,6 @@
 ;  - should check amount first
 ;- splitscreen (!)
 ;- names for cells and cell ranges (maybe additional token in front of 8-15?)
-;- import/export CSV, SYLK
 ;- FLO_PREPARE looses last decimal digit, try using FIX_FLO_TO_LW, if integer
 ;- optimize timget
 ;- percent as formula token/auto format
@@ -50,7 +54,6 @@
 ;- SymChart
 
 ;help ideas
-;- convert to browsable html
 ;- more examples
 ;- pdf generator
 ;- screenshots
@@ -346,6 +349,18 @@ _prpcat  equ 35
 _prptyp  equ 36
 _prpup   equ 37
 _prpdwn  equ 38
+_xchdec  equ 39
+_xchdic  equ 40
+_xchdes  equ 41
+_xchdis  equ 42
+_xchbrw  equ 43
+_xchexc  equ 44
+_xchimc  equ 45
+_xchexs  equ 46
+_xchims  equ 47
+
+
+tmpbuf  ds 256      ;temp buffer (fillod, fldedt, celput)
 
 
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -659,8 +674,10 @@ filmod  ld a,(docmodf)
         jp filsav0
 
 ;### FILNEW -> New document
-filnew  call filmod
-        jp c,prgprz0
+filnew  call filnew0
+        jp prgprz0
+filnew0 call filmod
+        ret c
         call prpdef_b
         ld de,filtits
         ld a,filtits0-filtits
@@ -668,7 +685,8 @@ filnew  call filmod
         call docclr
         call docmod0
         call docdrw
-        jp prgprz0
+        or a
+        ret
 
 ;### FILOPN -> Open document
 filopn  call filmod
@@ -678,14 +696,34 @@ filopn  call filmod
         or a
         call z,fillod
         jp prgprz0
-filopn0 ld hl,App_BnkNum
+filopn0 ld l,0
+        jr filbrw
+
+;### FILBRW -> Browse file
+;### Input      L=extension type (-1=just get address, 0=SCS, 3=CSV, 6=SLK), A=load(0)/save(64)
+;### Output     HL=docpth
+filbrwe db "SCS"
+        db "CSV"
+        db "SLK"
+
+filbrw  ld h,0
+        inc l
+        jr z,filbrw1
+        ld bc,filbrwe-1
+        add hl,bc
+        ld de,docmsk
+        ld bc,3
+        ldir
+        ld hl,App_BnkNum
         add (hl)
         ld hl,docmsk
         ld c,8
         ld ix,100
         ld iy,5000
         ld de,winmaidat
-        jp SySystem_SELOPN
+        call SySystem_SELOPN
+filbrw1 ld hl,docpth
+        ret
 
 ;### FILSAS -> Save document as
 filsas  call filsav1
@@ -783,7 +821,7 @@ filerrmem   equ 131 ;memory full
 
 ;### FILLOD -> load document
 fillodf db -1,-1,-1,-1              ;neg-flags, if all important parts loaded
-fillodb ds 64
+fillodb equ tmpbuf
 fillodi db "HEAD",56,0,0,0,"SCS",0
 
 fillod  ld (fillod3+1),sp
@@ -1146,6 +1184,23 @@ filerr1 ld (hl),e:inc hl
 filerr2 ld b,1+64
         jp prginf0
 
+;### FILIMC -> import CSV
+filimc  ld hl,_xchdic
+        jp guijmp_b
+
+;### FILEXC -> export CSV
+filexc  ld hl,_xchdec
+        jp guijmp_b
+
+;### FILIMS -> import SYLK
+filims  ld hl,_xchdis
+        jp guijmp_b
+
+;### FILEXS -> export SYLK
+filexs  ld hl,_xchdes
+        jp guijmp_b
+
+
 ;==============================================================================
 ;### DOCUMENT ROUTINES ########################################################
 ;==============================================================================
@@ -1167,7 +1222,7 @@ ds 4                    ; 4B date
 ds 28                   ;28B *unused*
 
 ;*** SHET
-docshtdat
+docshtdat           ;**tmpbuf**
 docnumrec   dw 0            ;1W number of cell records
 docadrrec   dw 0            ;1W orgadr of cell records
 doclenrec   dw 0            ;1W length of cell records
@@ -2233,9 +2288,6 @@ baradj9 ld de,celreclen         ;next
 ;### FIELD ROUTINES ###########################################################
 ;==============================================================================
 
-fldmaxx equ 63
-fldmaxy equ 253
-
 fldcuro db 0,0      ;cursor position old \
 fldcurp db 0,0      ;cursor position new |
 fldmrkp db 0,0      ;mark 1st position   |
@@ -2285,7 +2337,7 @@ fldmlr  xor a
         jp prgprz0
 
 ;### FLDEDT -> copies coordinates to editor, if editor-click-mode active
-fldedtb ds 251
+fldedtb equ tmpbuf
 
 fldedt  ld a,(fldclke)
         or a
@@ -3230,6 +3282,112 @@ visadd9 or a
 ;### CELL HANDLING ############################################################
 ;==============================================================================
 
+;### CELIMP -> prepares/finishes cell import
+;### Input      A=type (0=prepare, 1=finish; redraw cells)
+;### Output     prepare -> CF=1 -> cancel, CF=0 -> HL=tmpbuf
+celimp  or a
+        jr nz,celimp1
+        call coppst0
+        call filnew0
+        ret c
+        ld hl,tmpbuf
+        ret
+celimp1 call recrec
+        ld bc,(celcntall)
+        ld a,c:or b
+        ret z
+        ld (celcntdrw),bc
+        bc_counter
+        ld hl,celrecmem
+        ld de,celreclen
+celimp2 set 7,(hl)
+        add hl,de
+        djnz celimp2
+        dec c
+        jr nz,celimp2
+        jp recupd5
+
+;### CELPUT -> parses string and copies result into cell
+;### Input      L,H=cell, tmpbuf=string, C=length (with 0term)
+;### Output     CF=1 -> memory full
+celput  ld (copcelrec+celrecclm),hl
+        push hl
+        ld hl,tmpbuf
+        call celcnv
+        ld hl,celcnvtln
+        ld de,copceltxl
+        ld bc,252*2+4
+        ldir
+        ld a,(celcnvtyp)
+        ld (copcelrec+celrectyp),a
+        ld hl,celcnvref
+        ld de,copcelrec+celrecref
+        ld bc,4
+        ldir
+        pop hl
+        jp copput
+
+;### CELGET -> gets cell content as string (for export)
+;### Input      L,H=cell, E=type (+1=as displayed, +2=formula)
+;### Output     HL=text, BC=length (only if A>0; without 0term), A=type
+;### Destroyed  AF,DE,IX,IY
+celget  xor a
+        ld (celcnvtxt),a
+        push de
+        call fldcel
+        pop de
+        jr c,celget0
+        ld a,(hl)
+        ld (celget5+1),a
+        cp celtyptxt
+        jr z,celget2        ;cell is text -> just take text
+        cp celtypnum
+        jr z,celget3        ;cell is value -> take it with/without format
+        cp celtyperf
+        jr z,celget2        ;cell is formula with syntax error -> take text
+        cp celtyperv
+        jr z,celget2        ;cell is formula with value error -> take formula
+        bit 1,e
+        jr z,celget3        ;cell is formula -> take number if no formula required
+celget4 push hl:pop ix      ;** take formula
+        call celref
+        push hl:pop ix
+        ld iy,celcnvtxt+1
+        ld (iy-1),"="
+        call fortxt
+        ld c,a
+        ld b,0
+        ld hl,celcnvtxt
+        jr celget5
+celget0 ld hl,celcnvtxt     ;** empty cell
+        xor a
+        ret
+celget2 ld de,celrectxt     ;** take displayed text
+        add hl,de
+        ld a,(hl):inc hl
+        ld h,(hl):ld l,a
+        ld a,(hl)
+        inc hl:inc hl:inc hl
+        sub 4
+        ld c,a
+        ld b,0
+        ld de,celcnvtxt
+        push de
+        push bc
+        ldir
+        pop bc
+        pop hl
+celget5 ld a,0
+        ret
+celget3 bit 0,e             ;*** take number with/without format
+        jr nz,celget2
+        push hl:pop ix
+        call cellodc
+        push hl
+        call strlen
+        pop hl
+        jr celget5
+
 ;### CELLOD -> loads current cell into formula input
 ;### Input      (fldcurp)=field position
 cellod  ld hl,ctrfrminp+12
@@ -3260,34 +3418,7 @@ cellod1 ld a,(hl)                   ;check, what cell type
         jr z,cellod7
         cp celtypnum
         ;jr nz,cellod...other
-
-        ld e,(ix+celrecdat+0)   ;** number
-        ld d,(ix+celrecdat+1)
-        inc de:inc de:inc de
-        ld a,(ix+celrecfmt)
-        and #e0
-        cp 32*3
-        jr c,cellod9                ;float/exp/percent
-        cp 32*5
-        jr z,cellod9                ;boolean (=float)
-        jr nc,cellod4
-        call timedt                 ;date/time
-        jr celloda
-cellod9 ld hl,256*254+0             ;float
-        call cnvstr
-celloda dec c
-        ld hl,cnvstrtxt
-        jr cellod2
-cellod4 ld h,7                      ;bin/hex
-        push af
-        call cnvbin
-        pop af
-        cp 32*6
-        ld a,"%"
-        jr z,cellodb
-        ld a,"#"
-cellodb ld hl,cnvstrtxtp
-        ld (hl),a
+        call cellodc
         jr cellod2
 
 cellod7 ld l,(ix+celrecdat+0)   ;** formula with syntax error
@@ -3319,6 +3450,35 @@ cellod5 call celref             ;** formula
         ld ix,ctrfrminp
         call strini
         jr cellod0
+
+cellodc ld e,(ix+celrecdat+0)   ;** number
+        ld d,(ix+celrecdat+1)
+        inc de:inc de:inc de
+        ld a,(ix+celrecfmt)
+        and #e0
+        cp 32*3
+        jr c,cellod9                ;float/exp/percent
+        cp 32*5
+        jr z,cellod9                ;boolean (=float)
+        jr nc,cellod4
+        call timedt                 ;date/time
+        jr celloda
+cellod9 ld hl,256*254+0             ;float
+        call cnvstr
+celloda dec c
+        ld hl,cnvstrtxt
+        ret
+cellod4 ld h,7                      ;bin/hex
+        push af
+        call cnvbin
+        pop af
+        cp 32*6
+        ld a,"%"
+        jr z,cellodb
+        ld a,"#"
+cellodb ld hl,cnvstrtxtp
+        ld (hl),a
+        ret
 
 ;### CELSAV -> saves formula input to cell
 ;### Input      (fldcuro)=field position
@@ -3845,7 +4005,7 @@ celref1 add a:add a
         ret
 
 ;### CELCNV -> converts formula input into cell data
-;### Input      txtfrminp=formula
+;### Input      txtfrminp/HL=input, (ctrfrminp+8)/C=length (with 0term)
 ;### Output     celcnvXXX=prepared
 celcnvrec   dw 0        ;cell data record or 0
 
@@ -3860,19 +4020,23 @@ celcnvcol   db 16*1+8   ;##!!## set
 celcnvdsp   db 0
 celcnvfmt   db 0
 
-celcnv  xor a
+celcnv  ld bc,(ctrfrminp+8)
+        ld hl,txtfrminp
+celcnv0 ld (celcnve+1),hl
+        xor a
         ld (celcnvref),a
-        ld a,(ctrfrminp+8)
+        ld a,c
+        ld (celcnvf+1),a
         or a
         jr nz,celcnv3
         ld (celcnvtyp),a    ;** cell is empty
         ld (celcnvtln),a
         ld (celcnvdln),a
         ret
-celcnv3 ld a,(txtfrminp)
+celcnv3 ld a,(hl)
         cp "="
         jr z,celcnv4
-        ld iy,txtfrminp
+        push hl:pop iy
         ld hl,celcnvdat
         cp "@"
         jr z,celcnv7
@@ -3913,9 +4077,9 @@ celcnv1 ld a,celtyptxt      ;** cell is text
         ld (celcnvtyp),a
         xor a
         ld (celcnvdln),a
-        ld a,(ctrfrminp+8)
+celcnvf ld a,0
         inc a
-        ld hl,txtfrminp
+celcnve ld hl,0
 celcnv2 ld (celcnvtln),a
         ld de,celcnvtxt
         ld c,a
@@ -3923,7 +4087,8 @@ celcnv2 ld (celcnvtln),a
         ldir
         ret
 
-celcnv4 ld iy,txtfrminp+1   ;** cell is formula
+celcnv4 inc hl              ;** cell is formula
+        push hl:pop iy
         ld ix,celcnvtxt         ;first store formula data in cell text
         call fordat
         jp c,celerr
@@ -4028,7 +4193,7 @@ celerr2 ld a,c
 ;### Destroyed  AF,DE,HL,IX,IY
 celblddsp   db 0
 celbldfmt   db 0
-celbldbuf   ds 40+6
+celbldbuf   ds 40+6         ;**tmpbuf** ???
 
 celbldx ld (celbldbuf+0),bc
         ld (celbldbuf+2),de
@@ -5791,7 +5956,7 @@ cnvbnr5 add hl,hl
 
 
 ;==============================================================================
-;### COPY AND MOVE ROUTINES ###################################################
+;### CUT, COPY AND PASTE ROUTINES #############################################
 ;==============================================================================
 
 coprngbeg   db 0,0          ;left  upper cell
@@ -5803,9 +5968,9 @@ copdstend   db 0,0
 
 copcelrec   ds celreclen
 copceltxl   db 0,0
-copceltxt   ds 252
+copceltxt   ds 252          ;permamnent, can't be share
 copceldtl   db 0,0
-copceldat   ds 252
+copceldat   ds 252          ;permamnent, can't be share
 
 ;### COPCOP -> copy
 copcop  ld a,1
@@ -5866,6 +6031,7 @@ coppst1 ld bc,copput        ;copy cells to range
         call copmul
 coppst2 ld bc,recref        ;mark cells, who point to range
         call copmul
+
         push hl
         push de
         call reccel         ;recalculate all cells in range and who point there
@@ -5881,6 +6047,7 @@ coppstb ld a,(copmulm)
         ld a,errmeminfc
         call nz,prgalr
         jp prgprz0
+
 coppst3 call mrkact             ;** source = range
         jr nz,coppst4
         ld hl,(fldcurp)     ;dst=single -> expand to range
@@ -6162,7 +6329,7 @@ copget2 ld c,(hl):inc hl
 copget3 ld (de),a
         ret
 
-;### COPPUT -> copies from buffer to single cell, relocate references, mark for recalc
+;### COPPUT -> copies from buffer to single cell, relocate references, mark for recalc if formula
 ;### Input      L,H=destination cell, (copcelXXX)=cell data
 ;### Output     CF=0 -> ok, CF=1 -> memory full, HL=cell record
 ;### Destroyed  AF,BC,DE,HL,IX,IY
@@ -6398,6 +6565,7 @@ movrwi1 ld a,fldmaxy
         ld d,a          ;D=end row minus ysize -> DE=source end
         push bc
         call movopt     ;HL,BC=source beg/end
+        jr z,movrwr2
         pop af          ;A=ysize
         add h
         ld d,a          ;D=ysize+source Y beg
@@ -6418,6 +6586,7 @@ movcli1 ld a,fldmaxx
         ld b,c
         push bc
         call movopt     ;HL,BC=source beg/end
+        jr z,movrwr2
         pop af          ;A=xsize
         add l
         ld e,a          ;E=xsize+source X beg
@@ -6439,8 +6608,9 @@ movrwr1 push hl
         push hl
         call movopt     ;HL,BC=source beg/end
         pop hl
-        pop de
-        jr movmov
+movrwr2 pop de
+        jr nz,movmov
+        jp prgprz0
 
 ;### MOVCSR -> remove single column
 movcsr  call movvlb
@@ -6458,7 +6628,8 @@ movclr1 push hl
         call movopt     ;HL,BC=source beg/end
         pop hl
         pop de
-        jr movmov
+        jr nz,movmov
+        jp prgprz0
 
 ;### MOVMOV -> moves cells using cut&paste
 ;### Input      HL=source beg, BC=source end, DE=destination beg
@@ -6492,46 +6663,67 @@ movvlb  ld l,d
         ld bc,#0101
         ret
 
-;### MOVOPT -> optimized source range
+;### MOVOPT -> optimize source range
 ;### Input      HL=beg, DE=end
-;### Output     HL=beg optimized, BC=end optimized
-movoptb dw 0    ;\
-movopte dw 0    ;/
+;### Output     HL=beg optimized, BC=end optimized, ZF=1 -> no cell in area
+movopt  ld iy,(celcntall)
+        ld a,iyl:or iyh
+        ret z
+        iy_counter
+        ld a,e:inc a
+        ld (movopt2+1),a
+        ld a,d:inc a
+        ld (movopt4+1),a
+        ld a,l
+        ld (movopt3+1),a
+        ld a,h
+        ld (movopt5+1),a
+        ld hl,celrecmem+celrecclm
+        ld de,celreclen
+        ld ix,256*fldmaxy+fldmaxx   ;ix=min
+        ld bc,0                     ;bc=max
 
-movopt  ld bc,256*fldmaxy+fldmaxx
-        ld (movoptb),bc
-        ld bc,0
-        ld (movopte),bc
-        ld bc,movopt1
-        xor a
-        call copmul
-        ld hl,(movoptb)
-        ld bc,(movopte)
+movopt1 ld a,(hl)           ;a=column           ** check if inside area
+movopt2 cp 0
+        jr nc,movopt9       ;>max -> ignore
+movopt3 cp 0
+        jr c,movopt9        ;<min -> ignore
+        inc hl
+        ld a,(hl)           ;a=row
+        dec hl
+movopt4 cp 0
+        jr nc,movopt9       ;>max -> ignore
+movopt5 cp 0
+        jr c,movopt9        ;<min -> ignore (24)
+
+        cp ixh              ;a=row              ** check if new min/max row
+        jr nc,movopt6       ;>=current min -> keep
+        ld ixh,a            ;set new min row
+movopt6 cp b
+        jr c,movopt7        ;<current max -> keep
+        ld b,a              ;set new max row
+
+movopt7 ld a,(hl)
+        cp ixl              ;a=column           ** check if new min/max column
+        jr nc,movopt8       ;>=current min -> keep
+        ld ixl,a            ;set new min column
+movopt8 cp c
+        jr c,movopt9        ;<current max -> keep
+        ld c,a              ;set new max column (21)
+
+movopt9 add hl,de
+        dec iyh
+        jr nz,movopt1       ;(8 -> 24+21+8=53 -> 376 cells/frame, 5frames for 2048)
+        dec iyl
+        jr nz,movopt1
+
+        ld a,c
+        sub ixl             ;a=max-min
+        jr c,movopta        ;max<min -> no cells found
+        push ix:pop hl
+        inc a               ;found -> zf=0 (a was >=0, now still >0)
         ret
-movopt1 push hl
-        call fldcel         ;L,H=clm/row -> cf=0 cell existing
-        pop de
-        ccf
-        ret nc              ;no cell -> dont adjust borders
-        ld hl,(movoptb)     ;l=xfirst, h=yfirst
-        ld a,e
-        cp l
-        jr nc,movopt2
-        ld (movoptb+0),a    ;xactual<xfirst -> take it
-movopt2 ld a,d
-        cp h
-        jr nc,movopt3
-        ld (movoptb+1),a    ;yactual<yfirst -> take it
-movopt3 ld hl,(movopte)     ;l=xlast, h=ylast
-        ld a,e
-        cp l
-        jr c,movopt4
-        ld (movopte+0),a    ;xactual>=xlast -> take it
-movopt4 ld a,d
-        cp h
-        ret c
-        ld (movopte+1),a    ;yactual>=ylast -> take it
-        or a
+movopta xor a               ;not found ->  zf=1
         ret
 
 
@@ -6701,11 +6893,16 @@ ibkloc1 ld (ibkreg+2),bc
         ld (ibkreg+8),ix
         ld (ibkreg+10),iy
         push af:pop hl
-        ld (ibkreg+2),hl
+        ld (ibkreg+0),hl
         jp jmp_bnkret
 
 ibktab
 dw celbldx:celbld_  equ 00
+dw filbrw :filbrw_  equ 02
+dw movopt :movopt_  equ 04
+dw celget :celget_  equ 06
+dw celput :celget_  equ 08
+dw celimp :celget_  equ 10
 
 guijmp1 ld a,l
         cp _cfdpen
@@ -6715,7 +6912,7 @@ guijmp1 ld a,l
 guijmp2 ld a,(App_MsgBuf+4):ld e,a
         ld a,(App_MsgBuf+6):ld d,a
 guijmp_b
-guijmp equ $+2:ld ix,guijmp:call ib1cll
+guijmp equ $+2:ld ix,guijmp:call ib1clx
         dec l:jp z,cfdoky   ;ret_cfdoky
         dec l:jp z,barsst1  ;ret_barsdi
         dec l:jp z,prpoky   ;ret_prpoky
@@ -6748,6 +6945,11 @@ hshfnd_b:hshfnd equ $+2:ld ix,hshfnd
 ib1cll  ld b,0
 prgstk2 equ $+2
         ld iy,prgstk2
+        jp jmp_bnkcll
+
+ib1clx  ld b,0
+prgstk2a equ $+2
+        ld iy,prgstk2a
         jp jmp_bnkcll
 
 

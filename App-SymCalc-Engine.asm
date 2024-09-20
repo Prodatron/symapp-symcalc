@@ -728,7 +728,7 @@ fordata ld bc,0
 
 ;### FORTXT -> converts formula data into text
 ;### Input      IX=data, IY=text, (forcnvrXX)=references
-;### Output     A=text length
+;### Output     A=text length (without 0term)
 ;### Destroyed  F,BC,DE,HL,IX,IY
 fortxtchr   db "();"
 
@@ -2391,7 +2391,7 @@ recupd  ld de,0
         call recref         ; 808888    3203388     3306252      698636     3003392     2997080
 recupd1 call reccel         ;4016513    6865066     3983625                             3910503
         jr c,recupd2
-        call recdrw         ; 852275     985610     1222172                              848265
+recupd5 call recdrw         ; 852275     985610     1222172                              848265
 recupd4 ret nc
         ld a,errmeminfd
         call prgalr

@@ -8,6 +8,10 @@
 ;@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
+fldmaxx equ 63
+fldmaxy equ 253
+
+
 celtypnum   equ 1   ;number
 celtypfrn   equ 2   ;formula number
 celtyptxt   equ 3   ;text

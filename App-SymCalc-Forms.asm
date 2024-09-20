@@ -31,7 +31,10 @@ menmaidat   dw 7, 1+4,menmaitxt1, menmaidat1,0
             dw    1+4,menmaitxt6, menmaidat6,0
             dw    1+4,menmaitxt7, menmaidat7,0
 
-menmaidat1  dw 8, 1,menmaitxt11,filnew,0, 1,menmaitxt12,filopn,0, 1,menmaitxt13,filsav,0, 1,menmaitxt14,filsas,0, 1+8,0,0,0, 1,menmaitxt15,prpopn,0, 1+8,0,0,0, 1,menmaitxt10,prgend0,0
+menmaidat1  dw 11,1,menmaitxt11,filnew,0, 1,menmaitxt12,filopn,0, 1,menmaitxt13,filsav,0, 1,menmaitxt14,filsas,0, 1+8,0,0,0, 1+4,menmaitxt15,menmaidat15,0, 1+4,menmaitxt16,menmaidat16,0
+            dw 1+8,0,0,0, 1,menmaitxt17,prpopn,0, 1+8,0,0,0, 1,menmaitxt10,prgend0,0
+menmaidat15 dw 2, 1,menmaitxt151,filimc,0,1,menmaitxt152,filims,0
+menmaidat16 dw 2, 1,menmaitxt151,filexc,0,1,menmaitxt152,filexs,0
 
 menmaidat2  dw 8, 1,menmaitxt21,copcut,0, 1,menmaitxt22,copcop,0
 menmaidat2a dw    0,menmaitxt23,coppst,0, 1+8,0,0,0, 1,menmaitxt24,fldclr,0, 1+8,0,0,0, 1,menmaitxt25,mrkall,0, 1+4,menmaitxt26,menmaidat26,0
@@ -58,7 +61,11 @@ menmaitxt11 db "New",0
 menmaitxt12 db "Open...",0
 menmaitxt13 db "Save",0
 menmaitxt14 db "Save as...",0
-menmaitxt15 db "Properties...",0
+menmaitxt15 db "Import",0
+menmaitxt151 db "CSV file...",0
+menmaitxt152 db "SYLK file...",0
+menmaitxt16 db "Export",0
+menmaitxt17 db "Properties...",0
 menmaitxt10 db "Exit",0
 
 menmaitxt2  db "Edit",0
@@ -370,6 +377,7 @@ dw arrdwngfx-1
 dw gfxfrma-1
 dw prgalr2+1
 dw ib1cll+1
+dw ib1clx+1
 dw winmairec2+00+3
 dw winmairec2+16+3
 pt1bnk0
