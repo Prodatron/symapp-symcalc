@@ -47,6 +47,7 @@
 ;### FNCROW -> returns row
 ;### FNCTRU -> returns TRUE
 ;### FNCFLS -> returns FALSE
+;### FNCNOT  -> returns FALSE, if condition is true, otherwise TRUE
 ;### FNCIF  -> returns second parameter, if first is true, otherwise returns third parameter
 ;### FNCAND -> returns TRUE, if all values are TRUE
 ;### FNCOR  -> returns FALSE, if all values are FALSE
@@ -579,10 +580,9 @@ fopbit0 ld a,(fopbita+3)        ;convert LW+sign to FLT
         jr z,fopbit3
         ld hl,(fopbita+0)
         ld de,(fopbita+2)
-        call cnvbin2
+        call clcn32
         ld (fopbita+0),hl
         ld (fopbita+2),de
-        ld a,-1
 fopbit3 ld hl,fopbita
         call FLO_KONV_LW_TO_FLO
         jr foropr0
@@ -614,7 +614,7 @@ fopbit1 ld hl,cnvfltb           ;convert FLT to LW+sign
         ld de,(cnvfltb+2)
         bit 7,b
         ret z
-        jp cnvbin2
+        jp clcn32
 
 ;*** MATH OPERATORS ***********************************************************
 
@@ -774,7 +774,7 @@ fortxta push ix:pop de          ;bin/hex
         ld a,c
         ld h,7
         push bc
-        call cnvbin
+        call clcn32
         pop af
         pop de
         ld hl,cnvstrtxtp
@@ -1555,7 +1555,7 @@ fnctim  ld ixl,3:call fncnol
         pop bc              ;b=minute
         pop de
         ld c,d              ;c=hour
-        ld hl,1980          ;hl=year
+        ld hl,date_year_min ;hl=year
         ld de,#0101         ;e=month,d=day
 fnctim0 call timput
         jr c,fnctime
@@ -2323,19 +2323,6 @@ chrwht  ld a,(iy+0)
         inc iy
         jr chrwht
 
-;### CHRTRM -> check for terminator
-;### Input      (IY+0)=char, HL+1=terminator list, (HL)=list count
-;### Output     A=char, CF=0 -> is terminator, (HL)=terminator in list
-;### Destroyed  F,B,HL
-chrtrm  ld a,(iy+0)
-chrtrm0 ld b,(hl)
-chrtrm1 inc hl
-        cp (hl)
-        ret z
-        djnz chrtrm1
-        scf
-        ret
-
 ;### CHRALP -> check for alphanumeric (A-Z, a-z, 0-9)
 ;### Input      (IY+0)=char
 ;### Output     A=ucase(char), CF=0 -> is alphanumeric
@@ -2364,17 +2351,6 @@ chrlet  ld a,(iy+0)
         ret c
         cp "Z"+1
         ccf
-        ret
-
-;### CHRUCS -> uppercase
-;### Input      A=char
-;### Output     A=ucase(char)
-;### Destroyed  F
-chrucs  cp "a"
-        ret c
-        cp "z"+1
-        ret nc
-        add "A"-"a"
         ret
 
 
@@ -2778,4 +2754,6 @@ recrefb ld hl,recstkpos             ;** reference found
         ld hl,(celcntrec)
         inc hl
         ld (celcntrec),hl       ;increase counter
+        bit 4,l
+        call nz,bsybeg
         jr recrefe

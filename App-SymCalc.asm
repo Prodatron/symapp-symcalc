@@ -6,10 +6,8 @@
 ;@                                                                            @
 ;@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-;- (WIP) import/export CSV, SYLK
-
-;- dialogues (wingrp) with wrong esc/ok keys
-;- properties up/down missing
+;release 1.0
+;- (extend) mark with mouse+shift
 
 ;cell texts -> 2nd bank
 ;- cellod3 -> copy from 2nd
@@ -17,41 +15,33 @@
 ;- celrem  -> just delete
 ;- celutx  -> resize mem, copy to 2nd
 ;- mempoi  -> adjust celrec pointer in 1st, celctr pointer in 2nd
-
-;todo
-;- move remaining alerts
-;- leave editor with tab/shift+tab (like return, but next/prev cell)
-;- combine buffers
-;- program/regional config
-;- use default colours for new cells
+;- maybe move converters to 2nd
 
 ;glitches
-;- unmark with mouse on origin cell range field doesnt show cursor
-;- cursor-mark starts at top -> go up without shift -> no cursor
 ;- overlapping cells
 ;- komma aufrunden
-;- bold/italics no full paper -> missing OS feature
 ;- dynamic cell controls
 ;  - scrolling too fast -> forgot to plot some areas
 ;  - bar scroll sometimes messy
+;- bold/italics no full paper -> missing OS feature
 
 ;bugs
+;- missing memful/stackoverflow checks in engine etc
 ;- memful during cut&paste - alert hanging?
 ;- load -> test, if new memory is<= max available
+;- binary 32bit overflow
 
 ;nice to have
-;- show message/animation during calculation
-;  - copmul/fldmul, recalc etc
-;  - should check amount first
-;- splitscreen (!)
-;- names for cells and cell ranges (maybe additional token in front of 8-15?)
-;- FLO_PREPARE looses last decimal digit, try using FIX_FLO_TO_LW, if integer
-;- optimize timget
 ;- percent as formula token/auto format
 ;- valignment
-;- (extend) mark with mouse+shift
-;- show animation after cut/copy
+;- splitscreen (!)
+;- names for cells and cell ranges (maybe additional token in front of 8-15?)
+;- date with full 32bit, using negative values for low dates
 ;- SymChart
+
+;optimizing
+;- optimize timget
+;- FLO_PREPARE looses last decimal digit, try using FIX_FLO_TO_LW, if integer
 
 ;help ideas
 ;- more examples
@@ -68,11 +58,14 @@
 ;### PRGINF -> show info-box
 ;### PRGALR -> show alert window
 ;### PRGFIL -> Generates extended file path
+;### DOCPAR -> get document from command line parameter
+;### DOCAUT -> loads document automatically, if attached as command line parameter
 
 ;--- FILE ROUTINES ------------------------------------------------------------
 ;### FILMOD -> Ask for file-saving, if document has been modified
 ;### FILNEW -> New document
 ;### FILOPN -> Open document
+;### FILBRW -> Browse file
 ;### FILSAS -> Save document as
 ;### FILSAV -> Save document
 ;### FILTIT -> Refreshes window title with filename
@@ -84,6 +77,10 @@
 ;### FILEND -> file end reached
 ;### FILSTO -> save actual spreadsheet
 ;### FILERR -> show error message
+;### FILIMC -> import CSV
+;### FILEXC -> export CSV
+;### FILIMS -> import SYLK
+;### FILEXS -> export SYLK
 
 ;--- DOCUMENT ROUTINES --------------------------------------------------------
 ;### DOCMOD0 -> marks doc for not modified
@@ -158,6 +155,9 @@
 ;### VISADD -> tries to adds cell controls, which are now visible
 
 ;--- CELL HANDLING ------------------------------------------------------------
+;### CELIMP -> prepares/finishes cell import
+;### CELPUT -> parses string and copies result into cell
+;### CELGET -> gets cell content as string (for export)
 ;### CELLOD -> loads current cell into formula input
 ;### CELSAV -> saves formula input to cell
 ;### CELMEMx -> show message and optionally removes cell when memory full (coming from CELSAV)
@@ -186,7 +186,7 @@
 ;### FMTCOL -> open colour dropdown
 ;### FMTCUR -> try to get current cell or first cell in range
 ;### FMTALF/RG/CN -> set/reset alignment
-;### FMTFBL/IT/NO -> set font
+;### FMTFBL/IT/DF -> set font
 ;### FMTDSP -> displays format of current cell(s)
 ;### FMTNxx -> returns cell or default formatting for number types
 ;### FMTDFT -> set default format for cell and control, if new or type changed
@@ -215,7 +215,7 @@
 ;### CNVHXR -> reads hex from string
 ;### CNVBNR -> reads bin from string
 
-;--- COPY AND MOVE ROUTINES ---------------------------------------------------
+;--- CUT, COPY AND PASTE ROUTINES ---------------------------------------------
 ;### COPCOP -> copy
 ;### COPCUT -> cut
 ;### COPPST -> paste
@@ -224,7 +224,7 @@
 ;### COPTXT -> rebuilds text for cell in range, if it has been updated
 ;### COPMUL -> does operation on multiple cells
 ;### COPGET -> copies a single cell to the buffer
-;### COPPUT -> copies from buffer to single cell, relocate references, mark for recalc
+;### COPPUT -> copies from buffer to single cell, relocate references, mark for recalc if formula
 ;### COPRR1 -> activate reference in range check, if "cut" mode
 ;### COPRR0 -> deactivate reference in range check, if "cut" mode
 ;### COPRFR -> check, if reference completely points to range
@@ -246,7 +246,7 @@
 ;### MOVMOV -> moves cells using cut&paste
 ;### MOVVAL -> prepares values for cells movement
 ;### MOVVLB -> prepares values for bar-clicked single row/column movement
-;### MOVOPT -> optimized source range
+;### MOVOPT -> optimize source range
 
 ;--- CONFIG -------------------------------------------------------------------
 ;### CFGINI -> init config
@@ -323,7 +323,7 @@ _barsdia equ 09
 _barsdib equ 10
         ;equ 11
         ;equ 12
-        ;equ 13
+;*res*   equ 13
 _fmtcol  equ 14
 _fmtctb  equ 15
 _fmtc00  equ 16
@@ -351,13 +351,20 @@ _prpup   equ 37
 _prpdwn  equ 38
 _xchdec  equ 39
 _xchdic  equ 40
-_xchdes  equ 41
-_xchdis  equ 42
-_xchbrw  equ 43
-_xchexc  equ 44
-_xchimc  equ 45
-_xchexs  equ 46
-_xchims  equ 47
+_xchbrw  equ 41
+_xchexc  equ 42
+_xchimc  equ 43
+_xchipc  equ 44
+_xchexs  equ 45
+_xchims  equ 46
+_cfgopn  equ 47
+_cfgoky  equ 48
+_cfgtab  equ 49
+_cfgreg  equ 50
+_cfgctp  equ 51
+_cfgcol  equ 52
+_prpcol  equ 53
+_prpctp  equ 54
 
 
 tmpbuf  ds 256      ;temp buffer (fillod, fldedt, celput)
@@ -384,6 +391,7 @@ prgprzdly   db 0
 prgprz  call winbot             ;** booting beg
 
         call memini
+        call prgfil
         call ibkini
         call cfgini
         call hshini_b
@@ -403,6 +411,7 @@ prgprz  call winbot             ;** booting beg
 
         call fldfcf
         call fldcor
+        call docaut
 
 prgprzx ld de,(supcelctr+6)         ;** bar scrolling
         ld hl,(supcelctr+8)
@@ -429,6 +438,7 @@ prgprzb ld a,(fmtdspf)              ;** format of current cell
         jp c,visdrw
         call mrkchg                 ;** sum/average in status line
         jp nz,mrksum
+        call bsyend
 
         rst #30
         ld hl,prgprzdly
@@ -472,7 +482,7 @@ prgprzw dec ixl
         cp DSK_ACT_TOOLBAR
         jr z,prgprz1
         cp DSK_ACT_KEY
-        jr z,prgkey
+        jp z,prgkey
         cp DSK_ACT_CONTENT
         jr nz,prgprz0
 prgprz1 ld a,h
@@ -506,6 +516,8 @@ prgprz8 ld a,(winmainum)            ;** control focus changed
         cp (iy+1)
         jp nz,prgprz0
         ld a,(App_MsgBuf+2)
+        cp winmairec_next+1
+        jr z,keytbf
         cp winmairec_formu+1
         jr nz,prgprz9
         ld (ctroldfoc),a            ;new is editor -> store, "lost focus"=no (<>0)
@@ -555,23 +567,25 @@ prgkey1 ld hl,prgkeyt       ;outside spreadsheet
         jp nz,prgprz0
 prgkey2 jp (hl)
 
+keytbf  call fldfcf
+        jp fldcrg
+
 keyret  ld a,(winmaigrp+14)
         cp winmairec_formu+1
         jr nz,keyret1
         call fldfcf
         jp fldcdw
-keyret1 ;...
+keyret1 cp winmairec_fpos+1
+        jp z,fldset
+        ;...
         jp prgprz0
 
 keyesc  ld a,(winmaigrp+14)
         cp winmairec_formu+1
         jr nz,keyesc1
         call cellod
-        call fldfcf
+keyesc1 call fldfcf
         jp prgprz0
-keyesc1 ;...
-        jp prgprz0
-
 
 ;### PRGEND -> End program
 prgend0 call filmod
@@ -587,13 +601,10 @@ prghlp  call SySystem_HLPOPN
         jp prgprz0
 
 ;### PRGINF -> show info-box
-prginf  ld hl,prgtxtinf         ;*** info box
+prginf  ld a,prgmsginf          ;*** info box
         ld b,1+128+64
-prginf1 call prginf0
+        call prgalr0
         jp prgprz0
-prginf0 ld a,(App_BnkNum)
-        ld de,winmaidat
-        jp SySystem_SYSWRN
 
 ;### PRGALR -> show alert window
 ;### Input      A=alert message ID
@@ -611,46 +622,80 @@ prgalr2 ld a,0
         jp SySystem_SYSWRN
 
 ;### PRGFIL -> Generates extended file path
-datnam  db "symcalc.ex1",0:datnam0
-
-datpth  dw 0
-datfil  dw 0
+prgpth  dw 0
+prgfex  dw 0    ;address of file extension
 
 prgfil  ld hl,(App_BegCode)
         ld de,App_BegCode
         dec h
         add hl,de           ;HL = CodeEnd = path
-        ld (datpth),hl
-        ld e,l
-        ld d,h              ;DE=HL
+        ld (prgpth),hl
         ld b,255
 prgfil1 ld a,(hl)           ;search end of path
         or a
+        jr z,prgfil3
+        cp " "
         jr z,prgfil2
         inc hl
         djnz prgfil1
-        jr prgfil4
-        ld a,255
-        sub b
-        jr z,prgfil4
-        ld b,a
-prgfil2 dec hl              ;search start of filename
-        ld a,(hl)
-        cp "/"
-        jr z,prgfil3
-        cp "\"
-        jr z,prgfil3
-        cp ":"
-        jr z,prgfil3
-        djnz prgfil2
-        jr prgfil4
-prgfil3 inc hl
-        ex de,hl
-prgfil4 ld (datfil),de
-        ld hl,datnam        ;replace application filename with extended filename
-        ld bc,datnam0-datnam
+        jp prgend
+prgfil2 push hl
+        inc hl
+        call docpar
+        pop hl
+        ld (hl),0
+prgfil3 ld bc,-3
+        add hl,bc
+        ld (prgfex),hl
+        ret
+prgfil0 ld de,(prgfex)
+        ld bc,4
         ldir
         ret
+
+;### DOCPAR -> get document from command line parameter
+;### Input      HL=path
+docpar  ld de,docpth
+docpar1 ld a,(hl)
+        call chrucs
+        ld (hl),a
+        ldi
+        or a
+        jr nz,docpar1
+        dec hl:dec hl:dec hl:dec hl
+        ex de,hl
+        ld hl,filbrwe
+        ld c,3
+docpar2 push de
+        ld b,3
+docpar3 ld a,(de)
+        cp (hl)
+        jr nz,docpar4
+        inc hl
+        inc de
+        djnz docpar3
+        pop de
+        ld a,4
+        sub c
+        jr docpar5
+docpar4 pop de
+        inc hl:inc hl:inc hl
+        dec c
+        jr nz,docpar2
+        ld a,1
+docpar5 ld (docaut+1),a
+        ret
+
+;### DOCAUT -> loads document automatically, if attached as command line parameter
+docaut  ld a,0          ;0=no attached file, 1=SCS, 2=CSV, 3=SLK
+        or a
+        ret z           ;nothing
+        cp 2
+        jp c,fillod     ;SCS
+        ld hl,_xchipc
+        jr z,docaut1    ;CSV
+        ld hl,_xchims
+docaut1 jp guijmp_c     ;SLK
 
 
 ;==============================================================================
@@ -662,9 +707,9 @@ prgfil4 ld (datfil),de
 filmod  ld a,(docmodf)
         or a
         ret z
-        ld hl,prgtxtsav
+        ld a,prgmsgsav
         ld b,8*4+3+64
-        call prginf0
+        call prgalr0
         cp 1
         ret c
         sub 4
@@ -675,6 +720,7 @@ filmod  ld a,(docmodf)
 
 ;### FILNEW -> New document
 filnew  call filnew0
+        call docdrw
         jp prgprz0
 filnew0 call filmod
         ret c
@@ -684,7 +730,6 @@ filnew0 call filmod
         call filtit3
         call docclr
         call docmod0
-        call docdrw
         or a
         ret
 
@@ -814,6 +859,8 @@ chunum  equ 7
 
 filhnd  db 0
 
+filerrlod   equ 0   ;while loading
+filerrsav   equ 5   ;while saving
 filerrfrm   equ 128 ;wrong format
 filerrver   equ 129 ;unsupported new version
 filerrcor   equ 130 ;corrupt file
@@ -904,7 +951,7 @@ fillodc push af
         call docclr
         call fillod5
         pop af
-fillod4 ld de,prgerrtxt1a
+fillod4 ld e,filerrlod
         jp filerr
 fillod5 call filtit
         jp docdrw
@@ -1145,7 +1192,7 @@ filsto3 ld a,(filhnd)
 filsto4 push af
         call filsto3
         pop af
-filsto5 ld de,prgerrtxt1b
+filsto5 ld e,filerrsav
         jp filerr
 ;ix=chunk, hl=data, bc=length
 filsto1 ld (ix+4),c
@@ -1171,18 +1218,15 @@ filsto8 ld a,(App_BnkNum)
         jp SyFile_FILOUT
 
 ;### FILERR -> show error message
-;### Input      A=code, HL=type
-filerr  cp 128:ld hl,prgerrinfb:jr z,filerr1
-        cp 129:ld hl,prgerrinfc:jr z,filerr1
-        cp 130:ld hl,prgerrinfd:jr z,filerr1
-        cp 131:ld hl,prgerrinfe:jr z,filerr1
+;### Input      A=code, HL=type, E=load(0)/save(5)
+filerr  cp 128
+        jr nc,filerr1
         call cnvdec
-        ld (prgerrtxt3a0),hl
-        ld hl,prgerrinfa
-filerr1 ld (hl),e:inc hl
-        ld (hl),d:dec hl
-filerr2 ld b,1+64
-        jp prginf0
+        ;...set error code
+        ld a,127
+filerr1 add e
+        add errlodinfb-128
+        jp prgalr
 
 ;### FILIMC -> import CSV
 filimc  ld hl,_xchdic
@@ -1193,11 +1237,11 @@ filexc  ld hl,_xchdec
         jp guijmp_b
 
 ;### FILIMS -> import SYLK
-filims  ld hl,_xchdis
+filims  ld hl,_xchims
         jp guijmp_b
 
 ;### FILEXS -> export SYLK
-filexs  ld hl,_xchdes
+filexs  ld hl,_xchexs
         jp guijmp_b
 
 
@@ -1222,7 +1266,7 @@ ds 4                    ; 4B date
 ds 28                   ;28B *unused*
 
 ;*** SHET
-docshtdat           ;**tmpbuf**
+docshtdat
 docnumrec   dw 0            ;1W number of cell records
 docadrrec   dw 0            ;1W orgadr of cell records
 doclenrec   dw 0            ;1W length of cell records
@@ -1244,7 +1288,7 @@ docstadat   ds docstalen    ;   document state
                             ;6B *reserved*
 docshtdim   db fldmaxx+1    ;1B field xlen
             db fldmaxy+1    ;1B field ylen
-docshtnam   ds 9            ;9B sheet name+0
+docshtnam   ds 9            ;9B sheet name+0 (will be used later when supporting multiple sheets)
 
 ;### DOCMOD0 -> marks doc for not modified
 docmodf db 0    ;flag, if document has been modified
@@ -1258,6 +1302,7 @@ docmod0 xor a
 ;### Destroyed  AF,BC,DE,HL,IY
 doclod  call doclod0
         ld (visxln),de
+        call doccol
         call mrkact
         jr z,doclod4
         call mrkfld9            ;activate marking
@@ -1321,13 +1366,6 @@ docclr  call hshini_b           ;reset hashtable
         ldir
         ld hl,docclrb           ;reset state
         call doclod
-        ld a,(cfgcolpap)        ;set field colours
-        add 128
-        ld (supcelrec+4),a
-        ld a,(cfgcolgrd)
-        ld (ctrgrdhor),a
-        add 128
-        ld (ctrgrdver),a
         call barini
 docclr0 ld hl,-16               ;reset buttons
         ld (wintolrec1+6),hl
@@ -1434,6 +1472,30 @@ docdrw  ld de,256*winmairec_field-512+256-3
         call nz,SyDesktop_WINTOL
         call cellod
         jp fldcor
+
+;### DOCCOL -> sets default and field colours for primary spreadsheet
+doccol  ld a,(cfgcolpen)        ;set cell default colours
+        add a:add a:add a:add a
+        ld hl,cfgcolpap
+        or (hl)
+        ld (cfgfmtnum),a
+        ld (cfgfmttxt),a
+        ld (celcnvcol),a
+        ld a,(cfgcolgrd)
+        ld c,a
+        add a:add a:add c
+        ld (16*0+supcelrec1+4),a
+        ld a,c:xor 3:ld c,a
+        add a:add a:add c
+        ld (16*1+supcelrec1+4),a
+        ld a,(cfgcolpap)        ;set field colours
+        add 128
+        ld (supcelrec+4),a
+        ld a,(cfgcolgrd)
+        ld (ctrgrdhor),a
+        add 128
+        ld (ctrgrdver),a
+        ret
 
 
 ;==============================================================================
@@ -2411,10 +2473,7 @@ fldclk  ld a,(App_MsgBuf+3)
         ld de,(fldcurp)
         ld (fldclkf),de         ;remember orig curpos
 
-fldclk9 push hl
-        call mrkact
-        pop hl
-        call mrkrem
+fldclk9 call fldcurf            ;remove marking and set "update cursor anyway", there was a marking
         ld (fldcurp),hl
         ld a,1
         ld (fldclkd),a
@@ -2425,7 +2484,9 @@ fldclk9 push hl
         or a
         jr z,fldclk7
 
-        call fldcur0        ;** editor click mode; actual to old
+        db #3e:or a         ;** editor click mode
+        ld (fldcurd),a          ;reset "update cursor anyway"
+        call fldcur0            ;actual to old
         call fldcur3            ;calc curobj pos
         call fldcur6            ;plot cursor
         call fldcor             ;plot coordinate
@@ -2733,11 +2794,15 @@ flddrw3 ex de,hl            ;de=high len corrected
         ret
 
 ;### FLDCxx -> move cursor
-fldcpu  ld hl,0                     ;page up
+fldcpu  ld hl,0                     ;home
         jr fldcpd1
-fldcpd  ld hl,256*fldmaxy+0         ;page down
+fldcpd  ld de,256*fldmaxy+fldmaxx   ;end
+        ld hl,0
+        call movopt
+        jr z,fldcpu
+        ld l,c:ld h,b
 fldcpd1 ld (fldcurp),hl
-        call mrkrem
+        call fldcurf
         jr fldcurc
 
 fldclf0 ld bc,256*fldmaxx+256+255   ;shift+tab=left (ignore shift)
@@ -2760,6 +2825,7 @@ fldcury ld b,fldmaxy+1
         ld hl,fldcurp+1
         ld e,1
 
+;c=difference, (hl)=position, b=max
 fldcur  push bc                     ;check, if shift+cursor
         push de
         push hl
@@ -2771,9 +2837,9 @@ fldcur  push bc                     ;check, if shift+cursor
         pop bc
         jp c,mrkshf
         jr z,fldcur4
-        sla c:sla c:sla c
+        sla c:sla c:sla c           ;cursor+control -> skip 8 rows/columns
 
-fldcur4 call mrkrem
+fldcur4 call fldcurf
         ld a,(hl)                   ;move cursor
         add c
         bit 7,c
@@ -2794,11 +2860,23 @@ fldcur7 ld (hl),a
 fldcurc call fldcur1
         jp prgprz0
 
+fldcurf push hl                     ;if existing, remove marking and set "always update cursor" flag
+        call mrkact
+        pop hl
+        ret z
+        call mrkrem
+        db #3e:scf
+        ld (fldcurd),a
+        ret
+
 fldcur1 ld de,(fldcurp)             ;place cursor
         ld hl,(fldcuro)
-        or a
+fldcurd or a
+        jr c,fldcure
         sbc hl,de
         ret z                       ;-> didn't change
+fldcure db #3e:or a
+        ld (fldcurd),a
         push de
         call celsav
         call fldcor                 ;show cell position
@@ -2987,6 +3065,32 @@ fldcor5 add 26+"A"
         inc hl
         inc b
         ret
+
+;### FLDSET -> tries to set cursor/marking to entered cell/cell range
+fldsetd ds 2
+fldset  ld hl,0
+        ld (forcnvrsc),hl
+        ld iy,txtcelinp
+        call chrwht
+        ld ix,fldsetd
+        call cmpref
+        jr c,fldset2
+        call mrkrem
+        ld a,(fldsetd)
+        cp fortokref+4
+        jr nc,fldset1
+        ld hl,(forcnvrsd)       ;single cell -> set cursor
+        ld (fldcurp),hl
+        call fldcur1
+        call fldfcf
+        jp prgprz0
+fldset1 ld hl,(forcnvrrd+2)     ;cell range -> set marking
+        ld (fldmrks),hl
+        ld hl,(forcnvrrd+0)
+        jp mrkclm1
+fldset2 ld a,errforinf4         ;wrong reference
+        call prgalr
+        jp prgprz0
 
 
 ;==============================================================================
@@ -3292,28 +3396,17 @@ celimp  or a
         ret c
         ld hl,tmpbuf
         ret
-celimp1 call recrec
-        ld bc,(celcntall)
-        ld a,c:or b
-        ret z
-        ld (celcntdrw),bc
-        bc_counter
-        ld hl,celrecmem
-        ld de,celreclen
-celimp2 set 7,(hl)
-        add hl,de
-        djnz celimp2
-        dec c
-        jr nz,celimp2
-        jp recupd5
+celimp1 call recupd1
+        jp docdrw
 
 ;### CELPUT -> parses string and copies result into cell
-;### Input      L,H=cell, tmpbuf=string, C=length (with 0term)
+;### Input      L,H=cell, tmpbuf=string, BC=length (with 0term)
 ;### Output     CF=1 -> memory full
 celput  ld (copcelrec+celrecclm),hl
         push hl
         ld hl,tmpbuf
-        call celcnv
+        dec c
+        call celcnv0
         ld hl,celcnvtln
         ld de,copceltxl
         ld bc,252*2+4
@@ -4265,6 +4358,8 @@ celblda ld hl,celbldbuf
 celbldb call FLO_FIX_FLO_TO_LW
         ld hl,(celbldbuf+0)
         ld de,(celbldbuf+2)
+        bit 7,b
+        call nz,clcn32
         jp timget
 
 ;### CELUNI -> add unit to cell text
@@ -4437,9 +4532,11 @@ fmtaln4 rrca:rrca
 fmtaln7 ld hl,celrecdsp
 ;a=new value,c=mask,hl=record offset -> manipulate cells
 fmtaln0 call fmtaln1
-        jp prgprz0
+fmtaln9 jp prgprz0
 ;d=new value,e=mask -> manipulate cells (celreccol)
-fmtaln8 ld hl,celreccol
+fmtaln8 inc e:dec e
+        jr z,fmtaln9
+        ld hl,celreccol
         ld a,d
         ld c,e
         jr fmtaln0
@@ -4669,9 +4766,9 @@ timedtt db "_H:m:s",0
 timedtd db "@Y.M.D",0
 timedtf db "@Y.M.D_H:m:s",0
 
-timedt  call celblda        ;A=second (0-59), B=minute (0-59), C=hour (0-23), D=day (1-31), E=month (1-12), HL=year (1980-2047)
+timedt  call celblda        ;A=second (0-59), B=minute (0-59), C=hour (0-23), D=day (1-31), E=month (1-12), HL=year (date_year_min-date_year_max)
         push bc
-        ld bc,1980
+        ld bc,date_year_min
         or a
         sbc hl,bc
         add hl,bc
@@ -4707,7 +4804,7 @@ timredtde   db timredtde0-timredtde-1:db "+-*/\^);<>=&|_ ",0:timredtde0
 timredtti   db 1,":"
 timredtte   db timredtte0-timredtte-1:db "+-*/\^);<>=&|: ",0:timredtte0
 
-timredi dw 1980:db 1,1
+timredi dw date_year_min:db 1,1
         db 0,0,0
 
 timredd dw 0000:db 0,0  ;year, day, month
@@ -4730,9 +4827,9 @@ timred  call timred0
         ret
 timred2 ld hl,fmtndt        ;is date
         ld (timred9+1),hl
-        ld hl,timredtdi:ld bc,1980:ld de,2047:call cnvs16:ret c:       ld (timredd+0),hl    ;year
-        ld hl,timredtdi:ld bc,   1:ld de,  12:call cnvs16:ret c:ld a,l:ld (timredd+2),a     ;month
-        ld hl,timredtde:ld bc,   1:ld de,  31:call cnvs16:ret c:ld a,l:ld (timredd+3),a     ;day
+        ld hl,timredtdi:ld bc,date_year_min:ld de,date_year_max:call cnvs16:ret c:       ld (timredd+0),hl  ;year
+        ld hl,timredtdi:ld bc,            1:ld de,           12:call cnvs16:ret c:ld a,l:ld (timredd+2),a   ;month
+        ld hl,timredtde:ld bc,            1:ld de,           31:call cnvs16:ret c:ld a,l:ld (timredd+3),a   ;day
         ld a,(iy-1)
         cp "_"
         jr nz,timred4
@@ -4747,10 +4844,12 @@ timred5 ld bc,(timredt+0)
         ld de,(timredd+2)
         ld hl,(timredd+0)
         call timput
+timred1 xor a
+        bit 7,d
+        call nz,clcn32
 timred6 ld (0),hl
 timred7 ld (0),de
 timred8 ld hl,0
-        xor a
         call FLO_KONV_LW_TO_FLO
         dec iy
         or a
@@ -4763,7 +4862,7 @@ timred0 ld (timred8+1),hl
         ret
 
 ;### TIMWRT -> writes datetime as string with mask
-;### Input      A=second (0-59), B=minute (0-59), C=hour (0-23), D=day (1-31), E=month (1-12), HL=year (1980-2047)
+;### Input      A=second (0-59), B=minute (0-59), C=hour (0-23), D=day (1-31), E=month (1-12), HL=year (date_year_min-date_year_max)
 ;###            IY=mask, IX=string
 ;### Mask       s=second,m=minute,H=hour,h=hour12,a="AM"/"PM",D=day,M=month,Y=year,y=year 2digits,w=weekday 3chars,W=weekday full,n=month 3chars,N=month full
 ;### Output     C=string length (0-terminated)
@@ -4881,18 +4980,18 @@ timwh11 add 12
 timwdy  ld a,(timwrtd+4):jr timwrt4                     ;** "D" day
 timwmo  ld a,(timwrtd+3):jr timwrt4                     ;** "M" month
 timwy2  call timwy22                                    ;** "y" year 2digits
-timwy21 sub 20
+timwy21 sub 2000-date_year_min
         jr nc,timwrt4
         add 100
         jr timwrt4
 timwy22 ld hl,(timwrtd+5)
-        ld de,-1980
+        ld de,-date_year_min
         add hl,de
         ld a,l
         ret
 timwy4  call timwy22                                    ;** "Y" year 4digits
         ld de,"19"
-        cp 20
+        cp 2000-date_year_min
         jr c,timwy41
         ld de,"20"
 timwy41 call timwy42
@@ -4934,9 +5033,9 @@ timwes  ld a,(iy+0)                                     ;** "\" Escape
         jp timwrt7
 
 ;### TIMPUT -> converts time to timestamp value
-;### Input      A=second (0-59), B=minute (0-59), C=hour (0-23), D=day (1-31), E=month (1-12), HL=year (1980-2047)
-;### Output     CF=0 -> DE,HL=timestamp value (seconds since 1980)
-;###            CF=1 -> invalid date (<1980 or >2047)
+;### Input      A=second (0-59), B=minute (0-59), C=hour (0-23), D=day (1-31), E=month (1-12), HL=year (date_year_min-date_year_max)
+;### Output     CF=0 -> DE,HL=timestamp value (seconds since date_year_min)
+;###            CF=1 -> invalid date (<date_year_min or >date_year_max)
 ;### Destroyed  AF,BC,IX
 ;### Source     [24-07-03] https//de.wikipedia.org/wiki/Unixzeit#Beispiel-Implementierung
 
@@ -4957,11 +5056,11 @@ timput0 push af         ;no time/day/month validation
         ld (timput2+0+2),a
         inc a
         ld (timput2+3+2),a
-        ld de,-1980
-        add hl,de       ;hl=year-1980
+        ld de,-date_year_min
+        add hl,de       ;hl=year-date_year_min
         jr nc,timput6
         ld a,l
-        cp 2048-1980                        ;** year validation
+        cp date_year_max+1-date_year_min    ;** year validation
         jr nc,timput6
         ld (timput3+1),a
         or a
@@ -4969,10 +5068,10 @@ timput0 push af         ;no time/day/month validation
         dec a
         srl a:srl a
         inc a
-timput1 push af         ;a=leap years since 1980 (without current year)
+timput1 push af         ;a=leap years since date_year_min (without current year)
         ld a,l
         ld de,365
-        call clcm86     ;hl=year*365=days since 1980
+        call clcm86     ;hl=year*365=days since date_year_min
         pop af
         ld c,a
         ld b,0
@@ -5002,10 +5101,10 @@ timput4 ex de,hl
         add hl,bc
         adc b           ;ahl=days*24+hour
         ld e,a:ld d,0
-        call clc260     ;dehl=dehl*60=minutes since 1980
+        call clc260     ;dehl=dehl*60=minutes since date_year_min
         pop bc          ;b=minute
-        call timput5    ;dehl=minutes since 1980+minute
-        call clc260     ;dehl=seconds since 1980
+        call timput5    ;dehl=minutes since date_year_min+minute
+        call clc260     ;dehl=seconds since date_year_min
         pop bc          ;b=second
 timput5 ld c,b
         ld b,0
@@ -5021,7 +5120,7 @@ timput6 pop hl
         ret
 
 ;### TIMGET -> reads time from timestamp value ##!!## NOT OPTIMIZED
-;### Input      DE,HL=timestamp value (seconds since 1980)
+;### Input      DE,HL=timestamp value (seconds since date_year_min)
 ;### Output     A=second, B=minute, C=hour, D=day (starting from 1), E=month (starting from 1), HL=year
 ;### Destroyed  F,IX,IY
 
@@ -5048,7 +5147,7 @@ timgetmin   dw #003c,#0000      ;minute
 
 timgetmon   dw timgetmo1,timgetmo8,timgetmo1,timgetmo0,timgetmo1,timgetmo0,timgetmo1,timgetmo1,timgetmo0,timgetmo1,timgetmo0,timgetmo1
 
-timget  xor a                   ;** calculate year starting from 1980
+timget  xor a                   ;** calculate year starting from date_year_min
         ld iyl,a
 timget2 ld ix,timgetyer
         jr nz,timget3
@@ -5059,7 +5158,7 @@ timget3 push de
         jr c,timget4
         pop bc
         pop bc
-        inc iyl                 ;iyl=year-1980
+        inc iyl                 ;iyl=year-date_year_min
         inc a
         and 3
         jr timget2
@@ -5089,7 +5188,7 @@ timget6 inc a                   ;a=month (1-12)
 timget7 pop hl
         pop de
         pop bc
-        ld b,a                  ;c=year-1980, b=month (1-12)
+        ld b,a                  ;c=year-date_year_min, b=month (1-12)
         push bc
         ld iy,3                 ;** calculate day, hour, minute
         ld ix,timgetday
@@ -5120,7 +5219,7 @@ timgeta pop hl
         ld e,h          ;e=month
         push de
         ld h,0
-        ld de,1980
+        ld de,date_year_min
         add hl,de       ;hl=year
         pop de
         ret
@@ -5138,10 +5237,10 @@ timwkd  ld a,e
         dec hl
         add 12
 timwkd1 ld e,a              ;e=month (0-11 = mar-feb)
-        ld bc,-1980
+        ld bc,-date_year_min
         add hl,bc
         ld a,l
-        sub 20
+        sub 2000-date_year_min
         ld h,20
         jr nc,timwkd2
         add 100
@@ -5616,124 +5715,6 @@ cnvnuma cp (hl)
 cnvnumb ex de,hl
         ret
 
-;### CNV32S -> Converts 32Bit-number (unsigned) to string (terminated by 0)
-;### Input      DE,IX=value, IY=destination address
-;### Output     IY=Address of last char
-;### Destroyed  AF,BC,DE,HL,IX
-cnv32st dw 1,0,     10,0,     100,0,     1000,0,     10000,0
-        dw #86a0,1, #4240,#f, #9680,#98, #e100,#5f5, #ca00,#3b9a
-cnv32sz ds 4
-
-cnv32s  ld (cnv32sz),ix
-        ld (cnv32sz+2),de
-        ld ix,cnv32st+36
-        ld b,9
-        ld c,0
-cnv32s1 ld a,"0"
-        or a
-cnv32s2 ld e,(ix+0):ld d,(ix+1):ld hl,(cnv32sz):  sbc hl,de:ld (cnv32sz),hl
-        ld e,(ix+2):ld d,(ix+3):ld hl,(cnv32sz+2):sbc hl,de:ld (cnv32sz+2),hl
-        jr c,cnv32s5
-        inc c
-        inc a
-        jr cnv32s2
-cnv32s5 ld e,(ix+0):ld d,(ix+1):ld hl,(cnv32sz):  add hl,de:ld (cnv32sz),hl
-        ld e,(ix+2):ld d,(ix+3):ld hl,(cnv32sz+2):adc hl,de:ld (cnv32sz+2),hl
-        ld de,-4
-        add ix,de
-        inc c
-        dec c
-        jr z,cnv32s3
-        ld (iy+0),a
-        inc iy
-cnv32s3 djnz cnv32s1
-        ld a,(cnv32sz)
-        add "0"
-        ld (iy+0),a
-        ld (iy+1),0
-        ret
-
-;### CNV08S -> converts 8bit to decimal string
-;### Input      A=number, HL=destination string, B=counter
-;### Output     HL=next string position, B+=length
-;### Destroyed  AF,DE
-cnv08s  ld de,255
-        cp 100
-        jr c,cnv08s2
-        ld d,"2"
-        sub 200
-        jr nc,cnv08s1
-        add 100
-        dec d
-cnv08s1 ld (hl),d
-        inc hl
-        inc b
-cnv08s2 sub 10
-        inc e
-        jr nc,cnv08s2
-        jr nz,cnv08s3
-        inc d:dec d
-        jr z,cnv08s4
-cnv08s3 set 4,e
-        set 5,e
-        ld (hl),e
-        inc hl
-        inc b
-cnv08s4 add "0"+10
-        ld (hl),a
-        inc hl
-        inc b
-        ret
-
-;### CNVS16 -> converts string into number
-;### Input      IY=string, HL=terminator list, BC=min (>=0), DE=max (<=65534)
-;### Output     IY=string behind terminator, HL=number (>=min, <=max), CF=1 -> invalid
-;### Destroyed  AF,DE
-cnvs16  ld (cnvs166+1),hl
-        ld hl,0
-cnvs161 ld a,(iy+0)
-        inc iy
-        push bc
-        push hl
-cnvs166 ld hl,0
-        call chrtrm0
-        pop hl
-        pop bc
-        jr nc,cnvs163
-        sub "0"
-        cp 10
-        ccf
-        ret c
-        push bc
-        add hl,hl:jr c,cnvs162
-        ld c,l
-        ld b,h
-        add hl,hl:jr c,cnvs162
-        add hl,hl:jr c,cnvs162
-        add hl,bc:jr c,cnvs162
-        ld c,a
-        ld b,0
-        add hl,bc:ret c
-        pop bc
-        jr cnvs161
-cnvs162 pop bc
-cnvs165 ex de,hl
-        or a
-        ret
-cnvs163 sbc hl,bc
-        jr c,cnvs164
-        add hl,bc
-        inc de
-        sbc hl,de
-        jr nc,cnvs165
-        add hl,de
-        or a
-        ret
-cnvs164 ld l,c
-        ld h,b
-        or a
-        ret
-
 ;### CNVDEC -> converts byte into two decimal digits
 ;### Input      A=value
 ;### Output     L=10 ascii digit, H=1 ascii digit
@@ -5800,10 +5781,10 @@ cnvbin  push hl
         ldir
         pop bc
         ret
-cnvbin1 bit 7,b
-        ld hl,(cnvfltb+0)
+cnvbin1 ld hl,(cnvfltb+0)
         ld de,(cnvfltb+2)
-        call nz,cnvbin2
+        bit 7,b
+        call nz,clcn32
         ld a,(cfgnumbin)
         ld (cnvbint+17),a
         pop af
@@ -5877,12 +5858,6 @@ cnvbine ld a,(ix+0)
         jr nz,cnvbind
         ld b,0
         ret
-;de,hl=neg(de,hl)
-cnvbin2 xor a:sub l:ld l,a
-        sbc a:sub h:ld h,a
-        sbc a:sub e:ld e,a
-        sbc a:sub d:ld d,a
-        ret
 
 ;### CNVHXR -> reads hex from string
 ;### Input      IY=string, HL=5byte FP destination
@@ -5934,7 +5909,7 @@ cnvbnr1 push hl
         call chrtrm
         pop hl
         inc iy
-        jp nc,timred6
+        jp nc,timred1
 cnvbnr2 call cnvbnr4
         ret c
 cnvbnr3 call cnvbnr5
@@ -6002,12 +5977,13 @@ copcut  ld a,2
 
 ;### COPPST -> paste
 coppst  call coppst0
+        call bsyrng
         ld a,(coprngsta)
         or a
         jp z,prgprz0
         cp 2
         jr nz,coppst6
-        call mrkact             ;** source = cut range
+        call mrkact             ;** source = range cut
         ld hl,(fldcurp)
         jr z,coppst7
         call mrksrt         ;hl=min=destination
@@ -6021,7 +5997,7 @@ coppst6 ld hl,(coprngend)
         and h
         inc a
         jr nz,coppst3
-        call mrkact             ;** source = single
+        call mrkact             ;** source = single copy
         ld hl,(fldcurp)
         ld e,l:ld d,h
         jr z,coppst1
@@ -6048,7 +6024,7 @@ coppstb ld a,(copmulm)
         call nz,prgalr
         jp prgprz0
 
-coppst3 call mrkact             ;** source = range
+coppst3 call mrkact             ;** source = range copy
         jr nz,coppst4
         ld hl,(fldcurp)     ;dst=single -> expand to range
         call coppstd
@@ -6638,7 +6614,9 @@ movmov  ld (coprngbeg),hl
         ld a,2
         ld (coprngsta),a
         call coppst0
-        ex de,hl
+        push de
+        call bsyrng
+        pop hl
         jp coppst7
 
 ;### MOVVAL -> prepares values for cells movement
@@ -6770,6 +6748,10 @@ cfginit ld a,(cfgviwtol)
 ;errors
 errtxtovf   db "OVERFLOW",0:errtxtovf0
 
+;### CFGOPN -> opens config dialogue
+cfgopn  ld hl,_cfgopn
+        jp guijmp_b
+
 
 ;==============================================================================
 ;### DOCUMENT PROPERTIES ######################################################
@@ -6793,11 +6775,16 @@ prpopn  ld hl, celrecmax           :ld (prpopnm+00),hl  ;cells
         jp guijmp_b
 
 ;### PRPOKY -> document properties has been saved
-;### Input      E=type (0=nothing, 1=update all texts of number cells)
+;### Input      E=type (0=nothing, +1=update all texts of number cells, +2=redraw field)
 prpoky  ld a,1
         ld (docmodf),a
-        dec e
-        jp nz,prgprz0
+        push de
+        call doccol
+        pop de
+        inc e:dec e
+        jp z,prgprz0
+        bit 0,e
+        jr z,prpoky3
         ld hl,(celcntall)       ;hl=cell count
         ld a,l:or h
         jp z,prgprz0
@@ -6841,15 +6828,18 @@ prpoky4 pop hl                  ;** memful exception
 ;==============================================================================
 
 ;### IBKINI -> init extended modules
+ibkinif db "ex1",0:datnam0
+
 ibkini  ld a,"1"
         ld hl,ib1msg
         call ibkini1
         ld a,"2"
         ld hl,ib2msg
 ibkini1 push hl
-        ld (datnam+10),a
-        call prgfil
-        ld hl,(datpth)
+        ld (ibkinif+2),a
+        ld hl,ibkinif
+        call prgfil0
+        ld hl,(prgpth)
         ld a,(App_BnkNum)
         push af
         call SySystem_PRGRUN
@@ -6901,10 +6891,14 @@ dw celbldx:celbld_  equ 00
 dw filbrw :filbrw_  equ 02
 dw movopt :movopt_  equ 04
 dw celget :celget_  equ 06
-dw celput :celget_  equ 08
-dw celimp :celget_  equ 10
+dw celput :celput_  equ 08
+dw celimp :celimp_  equ 10
 
 guijmp1 ld a,l
+        cp _cfgcol
+        jr z,guijmp2
+        cp _prpcol
+        jr z,guijmp2
         cp _cfdpen
         jr z,guijmp2
         cp _cfdpap
@@ -6912,13 +6906,15 @@ guijmp1 ld a,l
 guijmp2 ld a,(App_MsgBuf+4):ld e,a
         ld a,(App_MsgBuf+6):ld d,a
 guijmp_b
-guijmp equ $+2:ld ix,guijmp:call ib1clx
+        call guijmp_c
         dec l:jp z,cfdoky   ;ret_cfdoky
         dec l:jp z,barsst1  ;ret_barsdi
         dec l:jp z,prpoky   ;ret_prpoky
         dec l:jp z,fmtaln8  ;ret_fmtaln
         ;...
         jp prgprz0
+guijmp_c
+guijmp equ $+2:ld ix,guijmp:jp ib1clx
 
 cfgmem_b:cfgmem equ $+2:ld ix,cfgmem:jr ib1cll
 cfgsav_b:cfgsav equ $+2:ld ix,cfgsav:jr ib1cll
@@ -6975,6 +6971,48 @@ keychk2 inc hl
         ld h,(hl)
         ld l,a
         ret
+
+
+;### BSYRNG -> starts showing busy message, if range is sizex+sizey>=12
+;### Destroyed  AF,HL,DE
+bsyrngm equ 12
+bsyrng  ld hl,(coprngend)
+        ld a,l:or h:inc a
+        ret z
+        ld de,(coprngbeg)
+        ld a,h:sub d
+        cp bsyrngm
+        jr nc,bsybeg
+        add l:sub e
+        cp bsyrngm
+        ret c
+;### BSYBEG -> starts showing busy message
+;### Destroyed  AF,HL,DE
+bsybeg  db 0
+        ld de,#c900
+        ld hl,txtbotbsy
+bsybeg1 push bc
+        push ix
+        push iy
+        ld a,d
+        ld (bsybeg),a
+        ld a,e
+        ld (bsyend),a
+        ld (ctrbotinf),hl
+        ld a,(winmainum)
+        ld e,winmairec_sum
+        call SyDesktop_WININH   ;show "busy"
+        pop iy
+        pop ix
+        pop bc
+        ret
+
+;### BSYEND -> stops showing busy message
+;### Destroyed  AF,HL,DE
+bsyend  ret
+        ld de,#00c9
+        ld hl,txtbotinf
+        jr bsybeg1
 
 ;### CLCRNG -> check, if value in range
 ;### Input      (DE+0)=range min, (DE+2)=range max, A=value
@@ -7038,6 +7076,17 @@ clcs32  ld c,(ix+0)
         ex de,hl
         ret
 
+;### CLCN32 -> negative of 32bit value
+;### Input      DE,HL=32bit value
+;### Output     DE,HL=-32bit value, A=128
+;### Destroyed  F
+clcn32  xor a:sub l:ld l,a
+        sbc a:sub h:ld h,a
+        sbc a:sub e:ld e,a
+        sbc a:sub d:ld d,a
+        ld a,128
+        ret
+
 ;### STRCMP -> string compare
 ;### Input      HL=string1, DE=string2, B=length
 ;### Output     ZF=1 -> same
@@ -7048,33 +7097,6 @@ strcmp  ld a,(de)
         inc de
         inc hl
         djnz strcmp
-        ret
-
-;### STRLEN -> get string length
-;### Input      HL=String (0-terminated)
-;### Output     HL=Stringend (0), BC=length (max 255, without 0-terminator)
-;### Destroyed  -
-strlen  push af
-        xor a
-        ld bc,255
-        cpir
-        ld a,254
-        sub c
-        ld c,a
-        dec hl
-        pop af
-        ret
-
-;### STRINI -> inits string input control
-;### Input      IX=control
-;### Destroyed  BC,HL
-strini  ld l,(ix+0)
-        ld h,(ix+1)
-        call strlen
-strini1 ld (ix+8),c
-        ld (ix+4),c
-        ld (ix+2),b
-        ld (ix+6),b
         ret
 
 ;### WINPOS -> gets main window position
@@ -7127,6 +7149,7 @@ memini  ld hl,celrecmax*celreclen
 read"App-SymCalc-Engine.asm"
 read"App-SymCalc-Memory.asm"
 read"App-SymCalc-Float.asm"
+read"App-SymCalc-Subs.asm"
 
 
 ;==============================================================================
@@ -7165,6 +7188,56 @@ dw celtxtmax    ;free  memory length
 dw 0            ;number of existing elements
 
 celtxtmem   db 0    ;***LAST IN DATA AREA***
+
+botlog db 78,156,20:dw $+7,$+4,156*20:db 5
+db #11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#66,#66,#66,#66,#66,#66
+db #66,#66,#61,#11,#11,#11,#11,#11,#66,#66,#66,#11,#11,#11,#11,#11,#11,#66,#66,#66,#61,#11,#11,#11,#11,#11,#11,#11,#11,#11,#66,#66,#66,#66,#66,#66,#66,#66,#61
+db #11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#66,#88,#88,#88,#88,#88,#88
+db #88,#88,#61,#11,#11,#11,#11,#16,#88,#88,#88,#61,#11,#11,#11,#11,#11,#68,#88,#88,#61,#11,#11,#11,#11,#11,#11,#11,#11,#66,#88,#88,#88,#88,#88,#88,#88,#88,#61
+db #11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#66,#88,#88,#88,#88,#88,#88,#88
+db #88,#86,#11,#11,#11,#11,#11,#16,#88,#88,#88,#61,#11,#11,#11,#11,#11,#68,#88,#88,#61,#11,#11,#11,#11,#11,#11,#11,#66,#88,#88,#88,#88,#88,#88,#88,#88,#86,#11
+db #11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#16,#88,#88,#88,#88,#88,#88,#88,#88
+db #88,#61,#11,#11,#11,#11,#11,#68,#88,#88,#88,#86,#11,#11,#11,#11,#11,#68,#88,#88,#61,#11,#11,#11,#11,#11,#11,#16,#88,#88,#88,#88,#88,#88,#88,#88,#88,#61,#11
+db #11,#11,#11,#17,#66,#66,#66,#66,#66,#66,#71,#76,#66,#61,#11,#11,#17,#66,#67,#16,#66,#11,#11,#11,#11,#11,#11,#17,#66,#71,#16,#88,#88,#88,#88,#88,#88,#88,#88
+db #86,#11,#11,#11,#11,#11,#16,#88,#88,#88,#88,#88,#61,#11,#11,#11,#11,#68,#88,#88,#61,#11,#11,#11,#11,#11,#11,#16,#88,#88,#88,#88,#88,#88,#88,#88,#86,#11,#11
+db #11,#11,#17,#66,#77,#11,#11,#11,#11,#11,#67,#67,#11,#76,#11,#11,#66,#71,#76,#76,#17,#61,#11,#11,#11,#11,#11,#76,#17,#61,#68,#88,#88,#86,#66,#66,#66,#66,#66
+db #61,#11,#11,#11,#11,#11,#68,#88,#88,#88,#88,#88,#61,#11,#11,#11,#11,#68,#88,#88,#61,#11,#11,#11,#11,#11,#11,#68,#88,#88,#86,#66,#66,#66,#66,#66,#61,#11,#11
+db #11,#11,#76,#11,#11,#11,#11,#11,#11,#11,#67,#76,#11,#16,#71,#17,#61,#11,#67,#76,#11,#76,#11,#11,#11,#11,#17,#61,#17,#61,#68,#88,#88,#61,#11,#11,#11,#11,#11
+db #11,#11,#11,#11,#11,#11,#68,#88,#88,#88,#88,#88,#86,#11,#11,#11,#11,#68,#88,#88,#61,#11,#11,#11,#11,#11,#11,#68,#88,#88,#61,#11,#11,#11,#11,#11,#11,#11,#11
+db #11,#17,#61,#11,#11,#11,#11,#11,#11,#11,#67,#16,#11,#17,#61,#16,#67,#77,#61,#76,#11,#17,#61,#11,#11,#11,#76,#11,#17,#61,#68,#88,#86,#11,#11,#11,#11,#11,#11
+db #11,#11,#11,#11,#11,#16,#88,#88,#88,#66,#88,#88,#88,#61,#11,#11,#11,#68,#88,#88,#61,#11,#11,#11,#11,#11,#11,#68,#88,#86,#11,#11,#11,#11,#11,#11,#11,#11,#11
+db #11,#76,#11,#11,#76,#66,#66,#66,#66,#66,#71,#16,#71,#11,#61,#16,#66,#66,#11,#76,#11,#11,#76,#11,#11,#17,#61,#11,#17,#61,#68,#88,#86,#11,#11,#11,#11,#11,#11
+db #11,#11,#11,#11,#11,#68,#88,#88,#86,#11,#68,#88,#88,#61,#11,#11,#11,#68,#88,#88,#61,#11,#11,#11,#11,#11,#11,#68,#88,#86,#11,#11,#11,#11,#11,#11,#11,#11,#11
+db #11,#61,#11,#16,#61,#11,#11,#11,#11,#11,#11,#11,#61,#11,#76,#66,#11,#16,#11,#76,#11,#11,#17,#61,#11,#76,#11,#11,#17,#61,#68,#88,#86,#11,#11,#11,#11,#11,#11
+db #11,#11,#11,#11,#11,#68,#88,#88,#61,#11,#16,#88,#88,#86,#11,#11,#11,#68,#88,#88,#61,#11,#11,#11,#11,#11,#11,#68,#88,#86,#11,#11,#11,#11,#11,#11,#11,#11,#11
+db #17,#61,#11,#67,#11,#11,#11,#11,#11,#11,#11,#11,#67,#11,#16,#61,#11,#76,#11,#76,#11,#11,#11,#76,#17,#61,#11,#11,#17,#61,#68,#88,#86,#11,#11,#11,#11,#11,#11
+db #11,#11,#11,#11,#16,#88,#88,#88,#61,#11,#16,#88,#88,#88,#61,#11,#11,#68,#88,#88,#61,#11,#11,#11,#11,#11,#11,#68,#88,#86,#11,#11,#11,#11,#11,#11,#11,#11,#11
+db #16,#66,#66,#71,#11,#11,#11,#11,#76,#66,#67,#11,#76,#11,#11,#11,#11,#61,#11,#76,#11,#11,#11,#17,#66,#11,#11,#11,#17,#61,#68,#88,#86,#11,#11,#11,#11,#11,#11
+db #11,#11,#11,#11,#68,#88,#88,#86,#11,#11,#11,#68,#88,#88,#61,#11,#11,#68,#88,#88,#61,#11,#11,#11,#11,#11,#11,#68,#88,#86,#11,#11,#11,#11,#11,#11,#11,#11,#11
+db #11,#11,#11,#11,#11,#11,#11,#17,#61,#11,#67,#11,#16,#11,#11,#11,#17,#61,#11,#76,#11,#11,#11,#17,#66,#11,#11,#11,#17,#61,#66,#66,#66,#11,#11,#11,#11,#11,#11
+db #11,#11,#11,#11,#66,#66,#66,#61,#11,#11,#11,#16,#88,#88,#86,#11,#11,#16,#66,#66,#61,#11,#11,#11,#11,#11,#11,#66,#66,#66,#11,#11,#11,#11,#11,#11,#11,#11,#11
+db #11,#11,#11,#11,#11,#11,#11,#76,#11,#17,#61,#11,#16,#61,#11,#11,#16,#71,#11,#76,#11,#16,#66,#66,#76,#66,#66,#11,#17,#61,#11,#11,#11,#11,#11,#11,#11,#11,#11
+db #11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#16,#88,#88,#86,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11
+db #17,#66,#66,#66,#66,#66,#66,#61,#11,#16,#71,#11,#11,#61,#11,#11,#16,#11,#11,#76,#11,#16,#71,#11,#11,#11,#16,#11,#17,#61,#16,#66,#66,#66,#66,#66,#66,#66,#66
+db #66,#66,#61,#16,#66,#66,#66,#66,#66,#66,#66,#66,#88,#88,#88,#61,#11,#16,#66,#66,#66,#66,#66,#66,#66,#66,#66,#16,#66,#66,#66,#66,#66,#66,#66,#66,#66,#66,#61
+db #16,#67,#77,#77,#77,#77,#11,#11,#11,#67,#11,#11,#11,#67,#11,#11,#66,#11,#11,#76,#11,#16,#71,#11,#11,#11,#16,#11,#17,#61,#16,#88,#88,#88,#88,#88,#88,#88,#88
+db #88,#88,#61,#68,#88,#88,#88,#88,#88,#88,#88,#88,#88,#88,#88,#86,#11,#68,#88,#88,#88,#88,#88,#88,#88,#88,#86,#16,#88,#88,#88,#88,#88,#88,#88,#88,#88,#88,#61
+db #16,#71,#11,#11,#11,#11,#11,#11,#16,#71,#11,#11,#11,#67,#11,#11,#66,#11,#11,#76,#11,#16,#71,#11,#11,#11,#16,#11,#17,#61,#11,#68,#88,#88,#88,#88,#88,#88,#88
+db #88,#86,#16,#88,#88,#88,#88,#88,#88,#88,#88,#88,#88,#88,#88,#86,#11,#68,#88,#88,#88,#88,#88,#88,#88,#88,#61,#11,#68,#88,#88,#88,#88,#88,#88,#88,#88,#86,#11
+db #16,#71,#11,#11,#11,#11,#11,#76,#67,#11,#11,#11,#11,#67,#11,#11,#66,#11,#11,#76,#11,#16,#71,#11,#11,#11,#16,#11,#17,#61,#11,#16,#88,#88,#88,#88,#88,#88,#88
+db #88,#86,#16,#88,#88,#88,#88,#88,#88,#88,#88,#88,#88,#88,#88,#88,#61,#68,#88,#88,#88,#88,#88,#88,#88,#88,#11,#11,#16,#88,#88,#88,#88,#88,#88,#88,#88,#86,#11
+db #17,#66,#66,#66,#66,#66,#66,#67,#11,#11,#11,#11,#11,#76,#66,#66,#67,#11,#11,#16,#66,#66,#71,#11,#11,#11,#16,#66,#66,#61,#11,#11,#66,#88,#88,#88,#88,#88,#88
+db #88,#61,#68,#88,#88,#88,#88,#88,#88,#88,#88,#88,#88,#88,#88,#88,#61,#68,#88,#88,#88,#88,#88,#88,#88,#86,#11,#11,#11,#66,#88,#88,#88,#88,#88,#88,#88,#61,#11
+db #11,#77,#77,#77,#77,#77,#71,#11,#11,#11,#11,#11,#11,#17,#77,#77,#71,#11,#11,#17,#77,#77,#11,#11,#11,#11,#11,#77,#77,#11,#11,#11,#11,#66,#66,#66,#66,#66,#66
+db #66,#11,#66,#66,#66,#66,#66,#66,#66,#66,#66,#66,#66,#66,#66,#66,#61,#66,#66,#66,#66,#66,#66,#66,#66,#11,#11,#11,#11,#11,#66,#66,#66,#66,#66,#66,#66,#11,#11
+
+txtbot1 db "member of SymbOS office suite",0
+txtbot2 db "the professional spreadsheet application",0
+txtbot3 db "(c) 2024 SymbiosiS",0
+txtbot4 db "Loading v1.0...",0
+
+botlog0
+
 
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ;### TRANSFER AREA ############################################################

@@ -1,0 +1,1885 @@
+<title>SymCalc help</title>
+
+
+
+<h1>1000-Introduction</h1 ####################################################>
+<br>
+<b>INTRODUCTION TO SYMCALC</b><br>
+<br>
+SymCalc is the SymbOS based spreadsheet program with powerful calculating abilities.<br>
+<br>
+You can use SymCalc worksheets for accounting applications to keep track of profit and loss in a business, or create a worksheet that will calculate and display a schedule of mortgage payments for your home. SymCalc handles these and other calculating tasks with ease and reliability. And because SymCalc is a SymbOS application you will be using the same easy to learn and use graphic environment that you are already familiar with.<br>
+<br>
+Unlike some other spreadsheet programs you may have used, SymCalc does not require that you learn a lot of complicated, or illogical commands in order to create and start working with your worksheet. Once you start up SymCalc you can immediately begin to type data into a worksheet that looks like a worksheet.<br>
+<br>
+
+
+<h2>1100-Feature overview</h2 ================================================>
+<br>
+<b>FEATURES</b><br>
+<br>
+&rarr; extensive cell text formatting<br>
+&rarr; absolute and relative single and multiple cell references<br>
+&rarr; powerful formula handling for calculating cell content<br>
+&rarr; 18 math and boolean operators<br>
+&rarr; more than 50 functions including full date and time computation and financial formulas<br>
+&rarr; fast auto-recalculaton of cells<br>
+&rarr; cut, copy & paste of cell ranges with full relocation of inner and outer cell references<br>
+&rarr; table functions like insert and remove cells, rows and columns<br>
+&rarr; date, time, boolean, binary and hexadecimal support<br>
+&rarr; mouse-based cell-reference-selection while editing a cell<br>
+&rarr; document meta information like author, subject, keywords<br>
+&rarr; user-defined number, units, date and time formats<br>
+&rarr; super fast hash-based cell-lookup for quick auto-recalculation<br>
+&rarr; CSV and SYLK import and export for easy file exchange<br>
+<br>
+
+
+<h2>1200-What's new?</h2 =====================================================>
+<br>
+<b>WHAT'S NEW?</b><br>
+<br>
+<b>V1.0 (2024-10-13)</b><br>
+<br>
+First full release.<br>
+<br>
+&rarr; CSV and SYLK import and export<br>
+&rarr; command line support for opening documents on startup<br>
+&rarr; editable cell address field<br>
+&rarr; preferences dialogue for application and default settings<br>
+&rarr; final fixes and tweaks<br>
+<br>
+<b>V0.8 (2024-09-09)</b><br>
+<br>
+First beta release.<br>
+&rarr; date/time/datetime, boolean, binary and hexadecimal support<br>
+&rarr; contains more than 50 functions including full date and time computation and financial formulas<br>
+&rarr; handles cut & paste with full relocation of inner and outer cell references<br>
+&rarr; table functions like insert and remove cells, rows and columns<br>
+&rarr; mouse-based cell-reference-selection while editing a cell<br>
+&rarr; load and save documents<br>
+&rarr; document meta information<br>
+&rarr; user-defined number, date and time formats<br>
+&rarr; super fast hash-based cell-lookup for quick auto-recalculation<br>
+<br>
+<b>V0.1 (2024-06-17)</b><br>
+<br>
+First alpha release.<br>
+&rarr; includes the basics of the UI<br>
+&rarr; handles extensive cell text formatting<br>
+&rarr; handles formulas<br>
+&rarr; contains first math- and other functions<br>
+&rarr; copy & paste of cell ranges<br>
+&rarr; auto-recalculaton of cells<br>
+<br>
+<b>V0.0 (2024-04-30)</b><br>
+<br>
+Starting SymCalc.<br>
+<br>
+
+
+<h2>1300-Credits</h2 =========================================================>
+<br>
+<b>CREDITS</b><br>
+<br>
+&rarr; Code and design by <b>Prodatron/SymbiosiS</b>, 2024<br>
+&rarr; Icon by <b>Prevtenet</b>, 2024<br>
+&rarr; Modern <b>Excel</b>-like User Interface by Microsoft, 1995<br>
+&rarr; 40bit floating point engine by Amstrad/<b>Locomotive</b> Software, 1984<br>
+&rarr; Spreadsheet application concept by <b>Visicalc</b>/Visicorp, Dan Bricklin, Bob Frankston, 1979<br>
+&rarr; Modern GUI concepts by <b>Xerox</b>, 1973<br>
+&rarr; Floating point implementation for computers by <b>Konrad Zuse</b>, 1937<br>
+&rarr; Introducing very cool math stuff by <b>Mankind</b>, 50.000BP until today<br>
+<hr __________________________________________________________________________>
+<br>
+<b>We are all standing on the shoulders of giants</b><br>
+<br>
+
+
+
+<h1>3000-Working with SymCalc</h1 ############################################>
+
+
+<h2>3100-Screen Layout</h2 ===================================================>
+<br>
+<b>SCREEN LAYOUT</b><br>
+<br>
+Before you start working with SymCalc you should have a quick overview of the screen components.<br>
+<br>
+<br>
+<b>Menu bar</b><br>
+<br>
+Like many SymbOS applications SymCalc contains a <u 6200>menu bar</u> at the top of the window, were you reach all available functions.<br>
+<br>
+<b>Tool bar</b><br>
+<br>
+Below the menu bar you will find the tool bar which contains icons for the most used functions.<br>
+- New, Open, Save, Print: See <u 6210>"File"</u> menu<br>
+- Bold, Italic, Left aligned, Centered, Right aligned, Colours: See <u 6240>"Format"</u> menu<br>
+<br>
+<b>Cell address field</b><br>
+<br>
+The cell address field is placed on the left side below the tool bar and shows the address of the actual cell or the selected cell range. It can also be used for typing in another cell for placing the cursor or a cell range for selecting an amount of cells. See <u 3200>The Spreadsheet</u>.<br>
+<br>
+<b>Cell editor</b><br>
+<br>
+The cell editor is placed on the right side below the tool bar. It shows the content of the actual cell and allows to edit it. See <u 3300>Editing Cells</u>.<br>
+<br>
+<b>Spreadsheet, column and row bars</b><br>
+<br>
+The spreadsheet is using the largest part of the screen and shows the current document with its cell matrix. See <u 3200>The Spreadsheet</u>.<br>
+<br>
+<b>Status bar</b><br>
+<br>
+At the bottom of the screen you will find the status bar. It shows the sum and the average of the selected cells or the working status, if a larger re-calculation is in progress.<br>
+<br>
+<br>
+To gain more space on the screen, both the tool bar and the status bar can be turned off, see <u 6230>"View"</u> menu.<br>
+<br>
+
+
+<h2>3200-The Spreadsheet</h2 =================================================>
+<br>
+<b>THE SPREADSHEET</b><br>
+<br>
+The spreadsheet is the document, with which are are working in SymCalc. It allows you to arrange different kinds of text and numeric data in a clear way and do powerful calculations with the data very easily. You can keep track of profit and loss in your big business, check your monthly private costs, do some funny math stuff or just write down a pizza order list.<br>
+<br>
+<b>Cell Matrix</b><br>
+<br>
+A spreadsheet consists of a matrix of cells. Each cell may contain a text, a numeric value, a formula with a numeric result, or just nothing. Cells are arranged by columns and rows. Columns can be identified by the letters at the upper bar, rows by the numbers at the left bar. Each cell is referenced by its column and row, so e.g. the second cell in the forth row is B4, while the third cell in the first row is C1 etc.<br>
+<br>
+<b>How To Navigate</b><br>
+<br>
+(check the <u 6100>Keyboard Shortcuts</u> as well)<br>
+<br>
+To navigate through a spreadsheet you can either use the mouse by clicking cells and scrollbars or use the cursor keys. The identifier of the actual cell is displayed in the upper left field above the spreadsheet. Its full content is displayed in the cell editor field on the upper right side. Both the mouse wheel can be used to scroll through the spreadsheet as well as cursor and control to skip pagewise. On advanced keyboards you can use page up/down or home/end for navigation. Another possibility is to type-in the cell address (e.g. C3) directly in the cell address field, and the cursor will jump to this one when pressing [Return].<br>
+<br>
+<b>Selecting Cell Ranges</b><br>
+<br>
+SymCalc provides many operations which can be applied to multiple cells, so you may want to select more than one cell at the same time. Navigate to the first cell, then use the cursor keys together with shift to mark the desired cell range. You can use the mouse as well, click on the first cell, keep the left mouse button down and move over the desired range to mark all cells. An additional possibility is to type-in the cell range in the cell address field and press [Return]. The first and the last cell have to be specified, separated by a colon (e.g. A1:D4).<br>
+<br>
+<b>Editing Cells</b><br>
+<br>
+To edit a cell, you can either just double click it, click the editor, press F2 or you just enter chars after selecting a cell. Please see the next chapter <u 3300>Editing Cells</u> for detailed information about how to edit a cell.<br>
+<br>
+<b>Context Menus</b><br>
+<br>
+In SymCalc you can open dedicated context menus by right-clicking the mouse over different areas.<br>
+<br>
+For inserting, removing or modifying rows or columns, you have to right-click on the left or upper bar. Here you can remove or insert columns and rows. You can also change the width of columns or the height of rows. By selecting multiple columns or rows you can change all their sizes in one step.<br>
+<br>
+Right-clicking on an actual cell or a selected cell range will open a context menu with a lot of options what to do now. For detailed information about cut, copy and paste please read the description of the <u 6220>Edit Menu</u>. For detailed information about inserting and removing cells, rows and columns please read the description of the <u 6250>Table Menu</u>.<br>
+<br>
+<b>Row And Column Sizes</b><br>
+<br>
+SymCalc also allows to change the width of a column or the height of a row directly by using the powerful GUI capabilities of the SymbOS operating system. Just click on a separation line inside the column or the row bar: A dotted line will appear any you can move it to change the with of a column or the height of a row very easy.<br>
+<br>
+
+
+<h2>3300-Editing Cells</h2 ===================================================>
+<br>
+<b>EDITING CELLS</b><br>
+<br>
+To enter new content for a cell, select it and just start typing. This will overwrite the previous content. If you want to edit an existing content of a cell you can either just double click it, click the editor or press F2. In both cases you will see and edit the content in the cell editor at the upper right screen.<br>
+<br>
+<b>Cell Types</b><br>
+<br>
+Beside of beeing empty cells can contain three different kinds of content:<br>
+&rarr; <b>Text</b>: You can enter any kind of text. This is for labeling rows and columns or just for adding descriptions in your spreadsheet. Cells with texts can't be used for calculations and will be ignored in several functions like the statistical ones.<br>
+&rarr; <b>Numeric value</b>: You can enter different kinds of <u 3400>numeric data</u>. These can be ordinal decimal numbers, numbers using the scientific notation or even dates, times, datetimes, binary or hexadecimal expressions. <u 3400>See here</u> for detailed information about how to enter different kind of values.<br>
+&rarr; <b>Formulas</b>: Any <u 3500>formula</u> is starting with an equality sign (=). After this a formula is written in the same way like you know it from todays standards in math and programming languages. You can use operands like values and cell references, operators like * and + for calculation, parenthesis for changing the order of operations, and of course all the many <u 8000>functions</u> provided by SymCalc. <u 3500>See here</u> for detailed information about how to enter a formula.<br>
+<br>
+<b>Entering A New Cell</b><br>
+<br>
+As soon as you are finished with entering the cell content you can just press [Return] or [Tab]. This will save the new cell content. If you don't want the new content but keep the old one, just press [Esc]. In both cases you will return back to the spreadsheet.<br>
+<br>
+If SymCalc can't detect a numeric value or a formula at all it will always handle the input as a text cell. So if you type in a number like 5643890563728952, which is too large for beeing stored as a numeric value, SymCalc will just keep it as text.<br>
+<br>
+If you entered a new cell, which was empty before, SymCalc tries to format the cell with the new cell type. That means, that binary, hexadecimal, date, time and datetime cells will always be displayed using the standard format of the related type.<br>
+<br>
+<b>Using the mouse for cell references</b><br>
+<br>
+When editing a formula, you can use the mouse to insert references to individual cells or cell ranges. To do this, simply click on the cell in the spreadsheet or select a cell range. Its references are then automatically inserted into the cell content.<br>
+<br>
+<b>Recalculation</b><br>
+<br>
+Once the value of a cell has changed, SymCalc checks to see if other cells reference the updated cell. If so, those cells are recalculated and all cells that reference them are also recalculated. It doesn't matter what order the cells are in the table, SymCalc will find all references in any direction. Although this uses a particularly fast algorithm, this process can still take a while for large, more complex tables.<br>
+<br>
+
+
+
+<h2>3400-Number Input Formats</h2 ============================================>
+<br>
+<b>NUMBER INPUT FORMATS</b><br>
+<br>
+SymCalc supports different types of number formats when you enter a value for a cell or within a formula. The most common formats are regular numbers like 262 or -144.256. By using special prefixes you can also enter and edit other types of numeric data.<br>
+<br>
+<b>Overview</b><br>
+<br>
+<b>Type     <t7>Prefix  <t12>Example</b><br>
+decimal     <t7>[none]  <t12>-123,456<br>
+scientific  <t7>[none]  <t12>1,23e-23<br>
+percentage  <t7>[none]  <t12>95%<br>
+binary      <t7>%       <t12>%1100101<br>
+hexadecimal <t7>#       <t12>#4BF80<br>
+date        <t7>@       <t12>@2024.08.13<br>
+time        <t7>_       <t12>_17:59:32<br>
+datetime    <t7>@..._   <t12>@2024.08.13_17:59:32<br>
+<br>
+<b>Limitations</b><br>
+<br>
+For storing and calculating numeric values SymCalc is using the CPCs original powerful 40bit floating point engine, which is binary based and uses a 32bit mantissa and an 8bit exponent. It already allows better high precision math operations compared to many other floating point engines from the 1980ies and 1990ies, which were often only 32bit and/or decimal based.<br>
+<br>
+Number are limited to a minimum/maximum decimal exponent of -39/+38. Binary, hexadecimal and datetime values are using the mantissa part only, which allows to handle 32bit numbers and any dates between 1980 and 2047.<br>
+
+<hr __________________________________________________________________________>
+<br>
+<b>Decimal</b><br>
+<br>
+A decimal number has to start with a digit (0-9) or a minus (-) followed by an amount of additional digits. It may contain a decimal point, which is a point (.) or a comma (,) depending on the regional settings. It must not contain any 1000 separators.<br>
+<br>
+Example:    <t7>-123,456<br>
+Limits:     <t7>9 digits<br>
+
+<hr __________________________________________________________________________>
+<br>
+<b>Scientific</b><br>
+<br>
+A number in scientific notation is a decimal number followed by an "e" which adds the base-ten exponent. The exponent may start with a minus (-) but must not contain a decimal point.<br>
+<br>
+Example:    <t7>1,23e-23<br>
+Limits:     <t7>3e-39 -> 1,7e+38<br>
+
+<hr __________________________________________________________________________>
+<br>
+<b>Percentage</b><br>
+<br>
+Percentage values can be entered like decimal numbers directly folowed by a "%" char. SymCalc will then convert them into ordinal decimal numbers just by dividing them by 100.<br>
+<br>
+Example:    <t7>95% (will be converted to 0,95)<br>
+
+<hr __________________________________________________________________________>
+<br>
+<b>Binary</b><br>
+<br>
+Binary numbers are identified with a "%" char as the prefix. They can only contain 0 and 1 digits. No minus (-), decimal points or separators are allowed. If you want to define a negative binary number, please use a formula like "=0-%1101".<br>
+<br>
+Example:    <t7>%1100101<br>
+Limits:     <t7>32 digits<br>
+
+<hr __________________________________________________________________________>
+<br>
+<b>Hexadecimal</b><br>
+<br>
+Binary numbers are identified with a "#" char as the prefix. They can contain 0-9 and A-F as digits. No minus (-), decimal points or separators are allowed. If you want to define a negative hexadecimal number, please use a formula like "=0-#ABCD".<br>
+<br>
+Example:    <t7>#4BF80<br>
+Limits:     <t7>8 digits<br>
+
+<hr __________________________________________________________________________>
+<br>
+<b>Date</b><br>
+<br>
+(check the <u 3410>Datetime Values</u> chapter as well)<br>
+<br>
+Dates are identified with a "@" char as the prefix, followed by the year, month and day, which have to be separated by a point (.). Years have to be between 1980 and 2047 (always four digits), months between 1 and 12 (one or two digits) and days between 1 and 31 (one or two digits).<br>
+<br>
+Example:    <t7>@2024.08.13<br>
+Limits:     <t7>@1980.1.1 -> @2047.12.31<br>
+
+<hr __________________________________________________________________________>
+<br>
+<b>Time</b><br>
+<br>
+Times are identified with a "_" char as the prefix, followed by the hour, minute and second, which have to be separated by a colon (":"). Hours have to be between 0 and 23, minutes and seconds between 0 and 59 (all one or two digits).<br>
+<br>
+Example:    <t7>_17:59:32<br>
+Limits:     <t7>_00:00:00 -> _23:59:59<br>
+
+<hr __________________________________________________________________________>
+<br>
+<b>Datetime</b><br>
+<br>
+Datetimes are a combination of a date and a time. They start with the "@" prefix and the date, which is directly followed by the "_" char and the time. For specifications and limits see above at "time" and "date".<br>
+<br>
+Example:    <t7>@2024.08.13_17:59:32<br>
+<br>
+
+<h3>3410-Datetime Values</h3 ------------------------------------------------->
+<br>
+<b>DATETIME VALUES</b><br>
+<br>
+This sub chapter describes, how date, time and datetime values are handled in SymCalc. This information maybe useful if you want to do your own math beside using the existing <u 8700>datetime functions</u>.<br>
+<br>
+Internally any "date", "time" or "datetime" expression is stored in a UNIX-like way as a signed 32bit number which presents the number of seconds since 01.01.1980 00:00:00 (ten years later compared to Unix). That allows to store any date and time until 31.12.2047.<br>
+<br>
+Knowing that every value is just an amount of seconds, and the length of a day is 24*60*60=86400 seconds you could now do your own calculations. E.g.<br>
+<br>
+=@2024.1.1+86400*10<br>
+<br>
+This is nothing else than adding 10 days to a datetime, and so in our case it will result in the 11.01.2024 .<br>
+<br>
+To find out the number of weeks between two dates you could just use the following formula:<br>
+<br>
+=(@2024.12.31-@2024.1.1)/86400/7<br>
+<br>
+which will result in around 52,14 which proves, that one year has a little bit more than 52 weeks. Btw if you type-in this example you will probably see 1.1.1980 as a result. The reason for this is, that SymCalc is supposing that you are working with dates, and so the cell display format will be switched to "date". You have to change the format back to "number" to see the decimal value.<br>
+<br>
+
+
+<h2>3500-Entering Formulas</h2 ===============================================>
+<br>
+<b>ENTERING FORMULAS</b><br>
+<br>
+In addition to text and numeric values, a cell can also contain a formula, which is nothing more than a mathematical expression. A formula always starts with a equality sign ("=") followed by the formula itself. This may contain numbers, cell references, operands, functions and parenthesis. SymCalc accepts formulas in the same general way you are used to in mathematics and programming.<br>
+<br>
+The most simple formula is just something like<br>
+=123<br>
+which will just return the value 123.<br>
+A more useful formula would be<br>
+=A1+A2<br>
+which returns the sum of the cells A1 and A2.<br>
+Here is an advanced example, which is using parenthesis and follows the order of operations:<br>
+=(A1+A2/A3)*A4/(100-A5)<br>
+<br>
+<b>Cell references</b><br>
+<br>
+In a formula you can use the content of other cells like variables. A cell reference consists of the letter or letters of the column and the number of the row. So A1 is just the first cell in the first row, while B4 is the second cell in the fourth row.<br>
+<br>
+<b>Cell ranges</b><br>
+<br>
+Several functions accept lists as a parameter. Such a list can be both multiple values and cell references but also cell ranges. Cell ranges are just defined by the upper left and the lower right cell, separated by a colon (":"). As an example, the cell range B3:E4 contains the cells B3,C3,D3,E3,B4,C4,D4 and E4.<br>
+<br>
+<b>Relative and absolute references</b><br>
+<br>
+Normally, a cell reference is treated as a relative reference. This means that the reference represents a relative distance to the current cells. An absolute cell reference is like a fixed address and is defined by writing a dollar sign ("$") before the letter and number of the reference. For example, A3 is a relative reference, while $A$3 is an absolute reference.<br>
+<br>
+The difference between relative and absolute references becomes important when you copy formulas from one cell to another using the <u 6220>copy function</u>. Relative references change depending on the new position of the copied cells, while absolute references always point to the same cell. Take a look at the <u 3520>compound interest example</u> to get a good idea of why relative and absolute references are used.<br>
+<br>
+References can also be a mixture of relative and absolute references. If only the columns are to be absolute, you just put the $ in front of the letter (e.g. $C12). If only the rows are to be absolute, you just put it in front of the number (e.g. C$12).<br>
+<br>
+<b>Order of operations</b><br>
+<br>
+When calculating a formula, SymCalc follows the conventional order of operations. This means that <u 3510>operators</u> are ranked. Those with the higher priority are executed before those with the lower priority. Parentheses always have the highest priority.<br>
+<br>
+The ranking of all operators in SymCalc is as follows (from high to low):<br>
+<br><b>
+() ^ * / + -<br>
+NAND AND XOR OR<br>
+&lt;> = >= > &lt;= &lt;<br>
+&& ||<br>
+</b><br>
+A detailed description of all operators can be found in <u 3510>this chapter</u>. The order in which the operators are listed here corresponds to their precedence.<br>
+<br>
+<b>Functions</b><br>
+<br>
+SymCalc offers a large number of <u 8000>functions</u> that can be used in formulas. A function always begins with its name and an opening parenthesis, followed by parameters separated by semicolons and a closing parenthesis. Each parameter can be a numeric value, a cell reference, or even a complete formula containing other functions. This allows for complex and powerful calculations even within a single cell.<br>
+<br>
+This example returns true (1) if the year specified in A1 is a leap year, otherwise it returns false (0):<br>
+<br>
+=DAYS(DATE_ADD(DATE(A1;12;31);0;0;1);DATE(A1;1;1))=366<br>
+<br>
+<b>Using the mouse for cell references</b><br>
+<br>
+When editing a formula, you can use the mouse to insert references to individual cells or cell ranges. To do this, simply click on the cell in the spreadsheet or select a cell range. Its references are then automatically inserted into the cell content.<br>
+<br>
+<b>Recalculation</b><br>
+<br>
+Once the value of a cell has changed, SymCalc checks to see if other cells reference the updated cell. If so, those cells are recalculated and all cells that reference them are also recalculated. It doesn't matter what order the cells are in the table, SymCalc will find all references in any direction. Although this uses a particularly fast algorithm, this process can still take a while for large, more complex tables.<br>
+<br>
+
+
+<h3>3510-Operators</h3 ------------------------------------------------------->
+<br>
+<b>OPERATORS</b><br>
+
+<hr __________________________________________________________________________>
+<br>
+<b>Boolean operators</b><br>
+<br>
+These will handle the operands as boolean values. A value equal 0 means "False", while any other value means "True". The result is again a boolean value, it will be either 0 (False) or 1 (True).<br>
+<br>
+<b>||</b>   <t5>op1 || op2    <t13>boolean OR<br>
+<b>&&</b>   <t5>op1 && op2    <t13>boolean AND<br>
+
+<hr __________________________________________________________________________>
+<br>
+<b>Comparison operators</b><br>
+<br>
+These can handle any type of operands and will always return a boolean value. If the result is true, it will return 1, if false it will return 0.<br>
+<br>
+<b>&lt;</b> <t5>op1&lt;op2  <t13>lower<br>
+<b>&lt;=</b><t5>op1&lt;=op2 <t13>lower or equal<br>
+<b>></b>    <t5>op1>op2     <t13>greater<br>
+<b>>=</b>   <t5>op1>=op2    <t13>greater or equal<br>
+<b>=</b>    <t5>op1=op2     <t13>equal<br>
+<b>&lt;></b><t5>op1&lt;>op2 <t13>unequal<br>
+
+<hr __________________________________________________________________________>
+<br>
+<b>Bitwise operators</b><br>
+<br>
+In contrast to the boolean operators, the operands here are treated bitwise.<br>
+%1010 OR %0001 equals %1011,<br>
+#31 AND #23 equals #21 etc.<br>
+<br>
+<b>OR</b>   <t5>op1 OR op2  <t13>bitwise OR<br>
+<b>XOR</b>  <t5>op1 XOR op2 <t13>bitwise XOR<br>
+<b>AND</b>  <t5>op1 AND op2 <t13>bitwise AND<br>
+<b>NAND</b> <t5>op1 NAND op2<t13>bitwise NAND<br>
+
+<hr __________________________________________________________________________>
+<br>
+<b>Math operators</b><br>
+<br>
+Hopefully you've been used to this since your elementary school days.<br>
+<br>
+<b>+</b>    <t5>op1+op2    <t13>addition<br>
+<b>-</b>    <t5>op1-op2    <t13>subtraction<br>
+<b>*</b>    <t5>op1*op2    <t13>multiplication<br>
+<b>/</b>    <t5>op1/op2    <t13>division<br>
+<b>^</b>    <t5>op1^op2    <t13>power<br>
+<br>
+
+
+<h3>3520-Examples</h3 -------------------------------------------------------->
+<br>
+<b>EXAMPLES</b><br>
+<br>
+<b>Example 1: Compound Interest</b><br>
+<br>
+This example is specifically intended to demonstrate the difference between relative and absolute cell references.<br>
+<br>
+You want to calculate compound interest and how your money grows. To do this, enter the following into your spreadsheet:<br>
+<br>
+    <t3>A           <t9>B           <t15>C<br>
+1   <t3>            <t9>Interest:   <t15>5%<br>
+2   <t3>            <t9>            <t15><br>
+3   <t3>Year:       <t9>Amount:     <t15>Owed:<br>
+4   <t3>2024        <t9>200         <t15>=B4*$C$1<br>
+5   <t3>=A4+1       <t9>=B4+C4      <t15>=B5*$C$1<br>
+<br>
+Look at C4: The reference to the amount (B4) is relative, while the reference to the interest rate is absolute ($C$1). A5 (next year) and B5 (new amount) also have relative references, while C5 again contains both. Now copy the cells in row 5 and paste them into a new range from A6 to C9.<br>
+<br>
+You can do this using the keyboard by navigating to cell A5, then pressing Shift and the left arrow key twice. Now press Control+C (Copy). Next, navigate to A6, press Shift and the arrow right key twice and the arrow down key twice. Now press Control+V (Paste). Or use the mouse, highlight the range from A5 to C5, right-click and select "Copy". Now highlight the range from A6 to C8, right-click and select "Paste".<br>
+<br>
+You will then get the following cell content:<br>
+<br>
+    <t3>A           <t9>B           <t15>C<br>
+6   <t3>=A5+1       <t9>=B5+C5      <t15>=B6*$C$1<br>
+7   <t3>=A6+1       <t9>=B6+C6      <t15>=B7*$C$1<br>
+8   <t3>=A7+1       <t9>=B7+C7      <t15>=B8*$C$1<br>
+<br>
+As you can see, all relative references have been adjusted, while the absolute references to C1 have remained the same. The result on your screen looks like this (formatted with two decimal places, using the $ unit):<br>
+<br>
+    <t3>A           <t9>B           <t15>C<br>
+1   <t3>            <t9>Interest:   <t15>5%<br>
+2   <t3>            <t9>            <t15><br>
+3   <t3>Year:       <t9>Amount:     <t15>Owed:<br>
+4   <t3>2024        <t9>200,00$     <t15>10,00$<br>
+5   <t3>2025        <t9>210,00$     <t15>10,50$<br>
+6   <t3>2026        <t9>220,50$     <t15>11,02$<br>
+7   <t3>2027        <t9>231,52$     <t15>11,57$<br>
+8   <t3>2028        <t9>243,10$     <t15>12,15$<br>
+<br>
+Tip: You could now change the interest rate at C1 or the starting amount at B4 and SymCalc will automatically recalculate the entire table for you.<br>
+<br>
+
+
+<h2>3700-Formatting Cells</h2 ================================================>
+<br>
+<b>FORMATTING CELLS</b><br>
+<br>
+Cells can be formatted in different ways.<br>
+- To improve the clearness and prettiness of your spreadsheet you can change the <i>font style</i>, <i>alignment</i> and <i>colours</i> of cells.<br>
+- To display the numeric values in different ways, you can change the <i>number display format</i> of cells.<br>
+<br>
+Changes to the format will always be applied to the current cell or the selected cell range. All text and some display formatting options can be reached via the buttons in the toolbar or with the <u 6240>"Format"</u> menu. The <u 3710>Cell Format Dialogue</u> provides all available formatting options. It can be reached with the cell context menu ("format cell(s)"), the "format" menu ("cell(s)") or by pressing Alt+0.<br>
+<br>
+<b>How to set...</b><br>
+<br>
+Here is an overview how you can set the different cell formats.<br>
+<br>
+<b>Number display format</b><br>
+        <t3>&rarr; <u 6240>"Format"</u> menu, "Number format"<br>
+        <t3>&rarr; <u 3710>Cell Format Dialogue</u>, "Number"<br>
+<br>
+<b>Alignment</b><br>
+        <t3>&rarr; toolbar icons [=], [=], [=]<br>
+        <t3>&rarr; <u 6240>"Format"</u> menu, "Alignment"<br>
+        <t3>&rarr; <u 3710>Cell Format Dialogue</u>, "Alignment"<br>
+<br>
+<b>Font style</b><br>
+        <t3>&rarr; toolbar icons [B], [I]<br>
+        <t3>&rarr; <u 6240>"Format"</u> menu, "Style"<br>
+        <t3>&rarr; <u 3710>Cell Format Dialogue</u>,<br>
+            <t4> "Font & Colours"<br>
+<br>
+<b>Colours</b><br>
+        <t3>&rarr; toolbar icon [A]<br>
+        <t3>&rarr; <u 3710>Cell Format Dialogue</u>,<br>
+            <t4> "Font & Colours"<br>
+<br>
+
+
+<h3>3710-Cell Format Dialogue</h3 -------------------------------------------->
+<br>
+<b>CELL FORMAT DIALOGUE</b><br>
+<br>
+To open the cell format dialogue you can either press Alt+0, right-click a cell or a selected cell range and choose "Format cell(s)" or use for <u 6240>"Format"</u> menu, "Cell(s)".<br>
+<br>
+The cell format dialogue consists of three tabs, one for setting the number display format, one for the alignment and one for the font style and colours. All tabs provide a preview field, which shows how the current cell or an example content will appear with the new settings.<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>Number</b><br>
+<br>
+Numeric cells can be displayed in different ways.<br>
+<br>
+Number      <t7>regular number<br>
+Date        <t7>date or datetime<br>
+Time        <t7>time or datetime<br>
+Percentage  <t7>shows the value*10 with %<br>
+Scientific  <t7>forces scientific notation<br>
+Boolean     <t7>shows keyword for true/false<br>
+Binary      <t7>binary display<br>
+Hexadecimal <t7>hexadecimal display<br>
+Text        <t7>plain text<br>
+<br>
+Numbers and percentage values that are too large or too small to be conveniently written in decimal form will be displayed in scientific notation.<br>
+<br>
+Additional options:<br>
+<br>
+- <b>Units</b>: Numbers, scientific, binary and hexadecimal values can be displayed with optional units like currency or physical measurement unit.<br>
+- <b>Format</b>: Time, date and datetime values can be displayed using different formats, e.g. DD.MM.YYYY or YYYY-MM-DD.<br>
+- <b>Keywords</b>: Boolean values always show a keyword for "false" (value is zero) and for "true" (value is not zero). You can choose, which keyword pairs should be used.<br>
+- <b>Decimal places</b>: To achieve better readability you can fix the number of decimal places displayed behind the decimal point for numbers and percentage values.<br>
+- <b>1000 separator</b>: You can also put the digits in groups of three for numbers and percentage values by using a separator. Depending on the country setting, this is usually a point "." or a comma ",". This makes large numbers easier to read.<br>
+- <b>Displayed digits</b>: For hinary and hexadecimal numbers you can limit the displayed digits. This makes it possible to handle numbers like e.g. 8 or 16 bit values.<br>
+- <b>0000 separator</b>: Bits and hex digits can be put in groups of four using a space separator for hinary and hexadecimal numbers.<br>
+<br>
+Units, time and date formats and boolean keywords can be redefined in the document properties, see <u 6210>"File"</u> menu, "Properties".<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>Alignment</b><br>
+<br>
+The visible text of a cell can be aligned...<br>
+&rarr; general<br>
+&rarr; left<br>
+&rarr; centered<br>
+&rarr; right<br>
+Choosing "general" will use the default behaviour, where text cells are left-aligned and numeric cells are right-aligned.<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>Font & Colour</b><br>
+<br>
+Cells can be displayed with<br>
+&rarr; plain<br>
+&rarr; bold<br>
+&rarr; italic<br>
+style.<br>
+<br>
+Both the foreground and the background of a cell can appear in different colours. Please note, that currently empty cells can't have individual background colours. But you can enter a text containing only a space " " char, which looks like an empty cell and can have its own colour. Background colours for cells with a bold or italic font style are currently not supported by the operating system.<br>
+<br>
+
+
+<h1>6000-User Interface</h1 ##################################################>
+
+
+<h2>6100-Keyboard shortcuts</h2 ==============================================>
+<br>
+<b>KEYBOARD SHORTCUTS</b><br>
+<br>
+The following is a list of all available keyboard shortcuts.<br>
+<br>
+<b>Global Shortcuts</b><br>
+<br>
+Ctrl+N          <t6>new document<br>
+Ctrl+O          <t6>load existing document<br>
+Ctrl+S          <t6>save document<br>
+Ctrl+Q          <t6>quit SymCalc<br>
+<br>
+<b>Within The Spreadsheet</b><br>
+<br>
+&larr;&rarr;&uarr;&darr;<t6>navigate within spreadsheet<br>
+&nbsp; ..+Shift <t6>mark cells<br>
+&nbsp; ..+Ctrl  <t6>jump page by page<br>
+PgUp/Dwn        <t6>jump up/down page by page<br>
+Home/End        <t6>jump to beginning/end of document<br>
+Return          <t6>go down<br>
+Tab             <t6>go right<br>
+Tab+Shift       <t6>go left<br>
+<br>
+F2              <t6>edit cell<br>
+Clr             <t6>clear actual/marked cells<br>
+Esc             <t6>remove marking<br>
+Ctrl+A          <t6>mark all<br>
+<br>
+Alt+0           <t6>open <u 3710>Cell Format Dialogue</u><br>
+Ctrl+L          <t6>left alignment<br>
+Ctrl+E          <t6>centered<br>
+Ctrl+R          <t6>right alignment<br>
+Ctrl+G          <t6>default alignment<br>
+Alt+B           <t6>bold text<br>
+Alt+I           <t6>italicize text<br>
+Alt+P           <t6>plain text<br>
+<br>
+Alt+1           <t6>number format<br>
+Alt+2           <t6>date format<br>
+Alt+3           <t6>time format<br>
+Alt+4           <t6>percentage format<br>
+Alt+5           <t6>scientific format<br>
+Alt+6           <t6>boolean format<br>
+Alt+7           <t6>binary format<br>
+Alt+8           <t6>hexadecimal format<br>
+Alt+9           <t6>1000 separator on/off<br>
+<br>
+Ctrl+C          <t6>copy actual or marked cells<br>
+Ctrl+X          <t6>prepare cut & paste for cells<br>
+Ctrl+V          <t6>(cut and) paste cells<br>
+<br>
+<b>While editing a cell</b><br>
+<br>
+Return          <t6>save changes and go down<br>
+Tab             <t6>save changes and go right<br>
+Esc             <t6>discard changes<br>
+<br>
+Check the <u 6220>Edit Menu</u> for a more detailed description about the cut/copy/paste functionality<br>
+<br>
+
+
+<h2>6200-Pull Down Menus</h2 =================================================>
+<br>
+<b>PULL DOWN MENUS</b><br>
+<br>
+Nearly all SymCalc functions can be reached via the pull down menus from the menu bar.<br>
+<br>
+&rarr; <u 6210>File</u>: document load and save, properties<br>
+<br>
+&rarr; <u 6220>Edit</u>: Cut, copy, paste, clear, select<br>
+<br>
+&rarr; <u 6230>View</u>: show/hide UI elements, preferences<br>
+<br>
+&rarr; <u 6240>Format</u>: style, alignment, number format, sizes<br>
+<br>
+&rarr; <u 6250>Table</u>: insert, move and delete cells, rows, columns<br>
+<br>
+&rarr; <u 6260>Data</u>: sort data<br>
+<br>
+&rarr; <u 6270>Help</u> (?): information and help<br>
+<br>
+
+
+<h3>6210-File</h3 ------------------------------------------------------------>
+<br>
+<b>"FILE" MENU</b><br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>>New</b><br>
+<br>
+Starts a new empty document. If the actual one hasn't been saved before, SymCalc will ask you, if this should be done first.<br>
+<br>
+<b>>Open...</b><br>
+<br>
+Opens an existing document. the file selection dialogue appears and you have to select an SymCalc spreadsheet file (*.SCS). If the actual one hasn't been saved before, SymCalc will ask you, if this should be done first.<br>
+<br>
+<b>>Save</b><br>
+<br>
+Saves the actual document under the last specified path and filename. If no filename has been defined so far, the file selection dialogue appears and you have to select a path and a filename for saving the document.<br>
+<br>
+<b>>Save as...</b><br>
+<br>
+The file selection dialogue appears, you have to select a path and a filename, and SymCalc will save the actual document at the specified location.<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>>Properties...</b><br>
+<br>
+Opens the document properties.<br>
+<br>
+&rarr; "summary" contains information like document title, author or comments.<br>
+<br>
+&rarr; "units & formats" allows you to redefine units for numbers (like Euro, Dollar), hexadecimal and binary values and date and time expressions. The latter are composed of the following abbreviations:<br>
+<t2><b>s</b> <t4>- second<br>
+<t2><b>m</b> <t4>- minute<br>
+<t2><b>H</b> <t4>- hour 24<br>
+<t2><b>h</b> <t4>- hour 12<br>
+<t2><b>a</b> <t4>- AM/PM<br>
+<t2><b>D</b> <t4>- day of the month<br>
+<t2><b>M</b> <t4>- month<br>
+<t2><b>Y</b> <t4>- year 4 digits<br>
+<t2><b>y</b> <t4>- year 2 digits<br>
+<t2><b>W</b> <t4>- weekday long (e.g. "Friday")<br>
+<t2><b>w</b> <t4>- weekday short (e.g. "Fri")<br>
+<t2><b>N</b> <t4>- month name long (e.g. "August")<br>
+<t2><b>n</b> <t4>- month name short (e.g. "Aug")<br>
+<t2><b>\</b> <t4>- print next char<br>
+<br>
+<t2>Example: "W, t\he D. of N" may result in<br>
+<t7>"Friday, the 31. of December"<br>
+<br>
+&rarr; "statistics" displays information about the resources the actual document is using like memory and number of cells.<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>>Exit</b><br>
+<br>
+Quits SymCalc. If the actual document hasn't been saved, SymCalc will ask you, if this should be done now.<br>
+<br>
+
+
+<h3>6220-Edit</h3 ------------------------------------------------------------>
+<br>
+<b>"EDIT" MENU</b><br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>>Cut</b><br>
+<br>
+Prepares the current cell or the cells of a selected cell range for a cut & paste process. The cells won't be cut right now but at the moment when you start a paste process (see below).<br>
+<br>
+<b>>Copy</b><br>
+<br>
+Copies the current cell or prepares the cells of a selected cell range for a copy & paste process (see next).<br>
+<br>
+<b>>Paste</b><br>
+<br>
+Depending on if you did a cut or a copy before this will perform a cut & paste or a copy & paste process. Cells will be pasted either into the new specified cell range, or if no cell range is marked, they will be pasted to the area starting at the actual cell.<br>
+<br>
+&rarr; Cut & paste: The cell or selected cell range will be moved from their original area to the new area. All relative references inside the cell range will be relocated as well as all relative references outside the cell range. The size of the destination cell range always has the size of the original cell range. If you marked a new range with different sizes, this will be ignored. Cells from the source area will be cleared, but the source and the destination area can overlap each other and will be moved correctly, so no cell is lost.<br>
+<br>
+&rarr; Copy & paste: The cell or selected cell range will be pasted to the new area. If the new area is smaller than the original cell range, only the first cells will be pasted. If the new area is larger, cells will be repeated both in X and Y direction if necessary. All relative references inside the new pasted cells will be relocated.<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>>Clear cell(s)</b><br>
+<br>
+Clears the content of the current cell or of all cells in the selected cell range.<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>>Select All</b><br>
+<br>
+Marks the complete spreadsheet.<br>
+<br>
+<b>>Select >Column</b><br>
+<br>
+Marks the complete current column. If a cell range was selected before, its first column will be marked.<br>
+<br>
+<b>>Select >Row</b><br>
+<br>
+Marks the complete current row. If a cell range was selected before, its first row will be marked.<br>
+<br>
+
+
+<h3>6230-View</h3 ------------------------------------------------------------>
+<br>
+<b>"VIEW" MENU</b><br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>>Tool bar</b><br>
+<br>
+Shows or hides the upper tool bar. It contains the most useful shortcut icons including these for text formatting. If you need more space, you can hide it and just use keyboard shortcuts or the menus.<br>
+<br>
+<b>>Status bar</b><br>
+<br>
+Shows or hides the lower status bar. Currently it shows the sum and the average of the selected cells. It will also contain the tabs for multiple sheets <i>(currently not implemented)</i>. If you need more space, you can just hide it.<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>>Preferences...</b><br>
+<br>
+Opens the preferences for application and default settings.<br>
+<br>
+&rarr; "Formatting" allows you to define regional settings and the default cell formatting.<br>
+<br>
+Depending on the country, numbers can have different characters for the decimal separator and digit grouping. For example, continental Europe uses "," and ".", while English-speaking countries use the opposite. Several presets are available for different regions. An additional character can be defined for grouping binary and hexadecimal numbers.<br>
+<br>
+Numbers may have a fix number of decimal places. Binary and hexadecimal values may show only a fixed amount of digits (e.g. "4" for 16bit hexadecimal numbers) and an optional prefix (usually "%" or "#"). For each type you can choose, if digits should be grouped or not.<br>
+<br>
+&rarr; Under "Colors & Sizes" you can set the colors of the cell contents, the background and the grid lines. You can also set the default sizes of a cell. Please note that these settings are only used when restarting SymCalc or creating a new sheet.<br>
+<br>
+
+<h3>6240-Format</h3 ---------------------------------------------------------->
+<br>
+<b>"FORMAT" MENU</b><br>
+<br>
+(check the <u 3710>Cell Format Dialogue</u> chapter as well)<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>>Style</b><br>
+<br>
+Changes the font style of the actual cell or selected cell range to bold, italic or normal.<br>
+<br>
+<b>>Alignment</b><br>
+<br>
+Changes the text alignment of the actual cell or selected cell range to left, centered, right and general. "General" is the default alignment and depends on the cell type. Texts will be left aligned, while numbers and formular results will be right aligned.<br>
+<br>
+
+<b>>Number format</b><br>
+<br>
+Changes the display format of cells which are containing a number. You can choose between "number", "date", "time", "percentage", "scientific", "boolean", "binary" and "hexadecimal". You can also activate or deactive display of the 1000 separator for large numbers.<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>>Cells...</b><br>
+<br>
+Opens the <u 3710>Cell Format Dialogue</u>, for detailed information please see there.<br>
+<br>
+<b>>Columns...</b><br>
+<b>>>Width</b><br>
+<br>
+Changes the width of the actual or all fully selected columns. A dialogue will appear where you can type in the new column width in pixels.
+<br>
+<b>>Rows...</b><br>
+<b>>>Height</b><br>
+<br>
+Changes the height of the actual or all fully selected rows. A dialogue will appear where you can type in the new row height in pixels.<br>
+<br>
+
+
+<h3>6250-Table</h3 ----------------------------------------------------------->
+<br>
+<b>"TABLE" MENU</b><br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>>Insert cell(s)</b><br>
+<br>
+Inserts new cells at the current cell or selected cell range and moves the existing cells either down or to the right. You can insert complete rows or columns as well.<br>
+<br>
+<b>>Insert rows(s)</b><br>
+<br>
+Inserts rows starting at the current cell or selected cell range. Depending on the height of the cell range, one or more rows will be inserted. This and the next function is identical to the one in the "insert cells" sub-menu.<br>
+<br>
+<b>>Insert columns(s)</b><br>
+<br>
+Inserts columns starting at the current cell or selected cell range. Depending on the height of the cell range, one or more columns will be inserted.<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>>Remove cell(s)</b><br>
+<br>
+Removes the cells at the current cell or selected cell range and moves the existing cells either up or to the left. You can remove complete rows or columns as well.<br>
+<br>
+<b>>Remove rows(s)</b><br>
+<br>
+Removes rows starting at the current cell or selected cell range. Depending on the height of the cell range, one or more rows will be removed. This and the next function is identical to the one in the "remove cells" sub-menu.<br>
+<br>
+<b>>Remove columns(s)</b><br>
+<br>
+Removes columns starting at the current cell or selected cell range. Depending on the height of the cell range, one or more columns will be removed.<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>>Clear cell content</b><br>
+<br>
+Clears the content of the current cell or all cells in the selected cell range.<br>
+<br>
+
+
+<h3>6260-Data</h3 ------------------------------------------------------------>
+<br>
+<b>"DATA" MENU</b><br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<i>[currently not implemented]</i><br>
+<br>
+
+
+<h3>6270-Help</h3 ------------------------------------------------------------>
+<br>
+<b>"?" HELP MENU</b><br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>>Help topics</b><br>
+<br>
+Opens this help.<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>>About</b><br>
+<br>
+Shows the SymCalc version and date.<br>
+<br>
+
+
+<h1>8000-Functions</h1 #######################################################>
+<br>
+<b>FUNCTIONS</b><br>
+<br>
+Functions are a convenient way to perform large or complex calculations. Think of functions as a kind of short hand that simplifies computations that would be very difficult, or sometimes nearly impossible, to express as formulas.<br>
+<br>
+A function may require an amount of values to produce a new value, and the number of values depends on the function. Some just require one value like SIN or SQRT, some require even three values like most financial ones, and there are also functions which don't require any value as they just return a constant like PI() or ROW(). Values are always separated by a semicolon (";").<br>
+<br>
+<b>Lists</b><br>
+<br>
+Several functions accept a list where the number of values is not fixed to a special amount. These functions are using a parameter called "list" at the last position, and this list can be multiple parameters, cell references, cell ranges or a combination of all this.<br>
+<br>
+Some examples how a list can be defined:<br>
+&rarr; MAX(1;3;5) - contains 1, 3 and 5<br>
+&rarr; MAX(A1:C3) - contains all cells in the range between A1 and C3<br>
+&rarr; MAX(1;2;A1:C3) - contains 1, 2 and the cell range A1 to C3<br>
+&rarr; MAX(1;A1:C3;C6;C7) - contains 1, the range A1 to C3 and cells C6 and C7<br>
+<br>
+
+<h2>8100-Summary</h2 =========================================================>
+<br>
+<b>FUNCTION SUMMARY</b><br>
+<br>
+<br>
+<u 8200>Mathematical</u><br>
+<br>
+<b>SIGN</b>(number)<br>
+        <t3>sign of a value (-1, 0, +1)<br>
+<b>ABS</b>(number)<br>
+        <t3>absolute value (positive number)<br>
+<b>INT</b>(number)<br>
+        <t3>down-rounded value<br>
+<b>FIX</b>(number)<br>
+        <t3>down-rounded value if positive,<br>
+        <t3>up-rounded if negative<br>
+<b>ROUND</b>(number)<br>
+        <t3>"correct" rounded value<br>
+<br>
+<br>
+<u 8300>Scientific and trigonometric</u><br>
+<br>
+<b>SQRT</b>(number)<br>
+        <t3>square root<br>
+<b>LN</b>(number)<br>
+        <t3>natural logarythm<br>
+<b>LOG10</b>(number)<br>
+        <t3>base10 logarythm<br>
+<b>EXP</b>(number)<br>
+        <t3>e^x (natural exponential function)<br>
+<b>PI</b>()<br>
+        <t3>PI<br>
+<b>SIN</b>(number)<br>
+        <t3>sinus<br>
+<b>COS</b>(number)<br>
+        <t3>cosinus<br>
+<b>TAN</b>(number)<br>
+        <t3>tangent<br>
+<b>ATAN</b>(number)<br>
+        <t3>arcus tangent<br>
+<b>FACT</b>(number)<br>
+        <t3>factorial (n!)<br>
+<b>FACTDOUBLE</b>(number)<br>
+        <t3>double factorial (n!!)<br>
+<br>
+<br>
+<u 8400>Statistical</u><br>
+<br>
+<b>MIN</b>(list)<br>
+        <t3>smallest value<br>
+<b>MAX</b>(list)<br>
+        <t3>largest value<br>
+<b>SUM</b>(list)<br>
+        <t3>sum of all values<br>
+<b>AVERAGE</b>(list)<br>
+        <t3>average of the values<br>
+<b>COUNT</b>(list)<br>
+        <t3>count of numeric values<br>
+<b>STDEV</b>(list)<br>
+        <t3>standard deviation<br>
+<br>
+<br>
+<u 8500>Financial</u><br>
+<br>
+<b>PV</b>(rate;nper;payment)<br>
+        <t3>present value<br>
+<b>PMT</b>(interest_rate;nper;present_value)<br>
+        <t3>periodic payment for an annuity<br>
+<b>FV</b>(interest_rate;nper;payment)<br>
+        <t3>future value<br>
+<b>RATE</b>(nper;present_value;future_value)<br>
+        <t3>rate<br>
+<b>NPER</b>(interest_rate;payment;future_value)<br>
+        <t3>nper<br>
+<b>NPV</b>(rate;list)<br>
+        <t3>new present value<br>
+<br>
+<br>
+<u 8600>Logical</u><br>
+<br>
+<b>AND</b>(list)<br>
+        <t3>ANDs all values (boolean)<br>
+<b>OR</b>(list)<br>
+        <t3>ORs all values (boolean)<br>
+<b>NOT</b>(value)<br>
+        <t3>!value<br>
+<b>IF</b>(condition;true-value;false-value)<br>
+        <t3>condition-dependant value<br>
+<b>TRUE</b>()<br>
+        <t3>true (=1)<br>
+<b>FALSE</b>()<br>
+        <t3>false (=0)<br>
+<br>
+<br>
+<u 8700>Date and time</u><br>
+<br>
+<b>DATE</b>(year;month;day)<br>
+        <t3>datetime date<br>
+<b>TIME</b>(hour;minute;second)<br>
+        <t3>datetime time<br>
+<b>DATETIME</b>(year;month;day;hour;min;sec)<br>
+        <t3>full datetime<br>
+<b>YEAR</b>(datetime)<br>
+        <t3>year of a datetime (1980-2047)<br>
+<b>MONTH</b>(datetime)<br>
+        <t3>month of a datetime (1-12)<br>
+<b>DAY</b>(datetime)<br>
+        <t3>day of a datetime (1-31)<br>
+<b>WEEKDAY</b>(datetime)<br>
+        <t3>weekday of a datetime (0-6)<br>
+<b>HOUR</b>(datetime)<br>
+        <t3>hour of a datetime (0-23)<br>
+<b>MINUTE</b>(datetime)<br>
+        <t3>minute of a datetime (0-59)<br>
+<b>SECOND</b>(datetime)<br>
+        <t3>second of a datetime (0-59)<br>
+<b>DATE_ADD</b>(datetime;years;months;days)<br>
+        <t3>adds years,months,days to a datetime<br>
+<b>TIME_ADD</b>(datetime;hours;minutes;seconds)<br>
+        <t3>adds hours,mins,seconds to a datetime<br>
+<b>YEARS</b>(datetime2;datetime1)<br>
+        <t3>years between two datetimes<br>
+<b>MONTHS</b>(datetime2;datetime1)<br>
+        <t3>months between two datetimes<br>
+<b>DAYS</b>(datetime2;datetime1)<br>
+        <t3>days between two datetimes<br>
+<b>HOURS</b>(datetime2;datetime1)<br>
+        <t3>hours between two datetimes<br>
+<b>MINUTES</b>(datetime2;datetime1)<br>
+        <t3>minutes between two datetimes<br>
+<b>SECONDS</b>(datetime2;datetime1)<br>
+        <t3>seconds between two datetimes<br>
+<br>
+<br>
+<u 8800>Table</u><br>
+<br>
+<b>COLUMN</b>()<br>
+        <t3>column (A=1, B=2, C=3 etc.)<br>
+<b>ROW</b>()<br>
+        <t3>row (1, 2, 3 etc.)<br>
+<br>
+<br>
+
+<h2>8200-Mathematical</h2 ====================================================>
+<br>
+<b>MATHEMATICAL FUNCTIONS</b><br>
+<br>
+Mathematical functions are the simplest SymCalc functions.<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>SIGN</b>(value)<br>
+returns the sign of a value; -1 (if negative), 0 (if zero), +1 (if positive)<br>
+<br>
+Parameters:<br>
+<t1><b>value</b><br>
+<br>
+Example:<br>
+<t1>SIGN(-321,45)<br>
+Result:<br>
+<t1>-1<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>ABS</b>(value)<br>
+returns the absolute value (positive number)<br>
+<br>
+Parameters:<br>
+<t1><b>value</b><br>
+<br>
+Example:<br>
+<t1>ABS(-321,45)<br>
+Result:<br>
+<t1>321,45<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>INT</b>(value)<br>
+returns the down-rounded value<br>
+<br>
+Parameters:<br>
+<t1><b>value</b><br>
+<br>
+Example:<br>
+<t1>INT(1,6)<br>
+Result:<br>
+<t1>1<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>FIX</b>(value)<br>
+returns the down-rounded value if positive, up-rounded if negative<br>
+<br>
+Parameters:<br>
+<t1><b>value</b><br>
+<br>
+Example:<br>
+<t1>FIX(-1,6)<br>
+Result:<br>
+<t1>-1<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>ROUND</b>(value)<br>
+returns the correct rounded value<br>
+<br>
+Parameters:<br>
+<t1><b>value</b><br>
+<br>
+Example:<br>
+<t1>ROUND(1,6)<br>
+Result:<br>
+<t1>2<br>
+<br>
+
+
+<h2>8300-Scientific & trigonom.</h2 ==========================================>
+<br>
+<b>SCIENTIFIC AND TRIGONOMETRIC FUNCTIONS</b><br>
+<br>
+SymCalc includes a number of scientific and trigonometric functions that are of use to scientist and engineers.<br>
+<br>
+Please note, that all trigonometric functions expect radian values, which means, that one full circle would be 2*PI(). For using degrees (360 for one full circle), just multiply the values with PI()/180. E.g. SIN(270*PI()/180) would return the sinus of 270 degrees (=-1).<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>SQRT</b>(number)<br>
+calculates the square root of a given number<br>
+<br>
+Parameters:<br>
+<t1><b>number</b><br>
+<br>
+Example:<br>
+<t1>SQRT(16)<br>
+Result:<br>
+<t1>4<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>LN</b>(number)<br>
+calculates the natural logarythm of a given number<br>
+<br>
+Parameters:<br>
+<t1><b>number</b><br>
+<br>
+Example:<br>
+<t1>LN(2)<br>
+Result:<br>
+<t1>0,693147181<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>LOG10</b>(number)<br>
+calculates the base10 logarythm of a given number<br>
+<br>
+Parameters:<br>
+<t1><b>number</b><br>
+<br>
+Example:<br>
+<t1>LOG10(10000)<br>
+Result:<br>
+<t1>4<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>EXP</b>(number)<br>
+calculates e^x (natural exponential function)<br>
+<br>
+Parameters:<br>
+<t1><b>number</b><br>
+<br>
+Example:<br>
+<t1>EXP(10)<br>
+Result:<br>
+<t1>22026,4658<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>PI</b>()<br>
+returns PI, which is the ratio of a circle's circumference to its diameter, approximately equal to 3.14159<br>
+<br>
+Parameters: none<br>
+<br>
+Example:<br>
+<t1>PI()<br>
+Result:<br>
+<t1>3,14159265<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>SIN</b>(number)<br>
+calculates the sinus of a given number<br>
+<br>
+Parameters:<br>
+<t1><b>number</b><br>
+<br>
+Example:<br>
+<t1>SIN(PI()/2)<br>
+Result:<br>
+<t1>1<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>COS</b>(number)<br>
+calculates the cosinus of a given number<br>
+<br>
+Parameters:<br>
+<t1><b>number</b><br>
+<br>
+Example:<br>
+<t1>COS(PI())<br>
+Result:<br>
+<t1>-1<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>TAN</b>(number)<br>
+calculates the tangent of a given number<br>
+<br>
+Parameters:<br>
+<t1><b>number</b><br>
+<br>
+Example:<br>
+<t1>TAN(PI())<br>
+Result:<br>
+<t1>0<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>ATAN</b>(number)<br>
+calculates the arcus tangent of a given number<br>
+<br>
+Parameters:<br>
+<t1><b>number</b><br>
+<br>
+Example:<br>
+<t1>ATAN(2)<br>
+Result:<br>
+<t1>1,10714872<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>FACT</b>(number)<br>
+calculates the factorial (n!)<br>
+<br>
+Parameters:<br>
+<t1><b>number</b><br>
+<br>
+Example:<br>
+<t1>FACT(7)<br>
+Result:<br>
+<t1>5040<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>FACTDOUBLE</b>(number)<br>
+calculates the double factorial (n!!)<br>
+<br>
+Parameters:<br>
+<t1><b>number</b><br>
+<br>
+Example:<br>
+<t1>FACTDOUBLE(10)<br>
+Result:<br>
+<t1>3840<br>
+<br>
+
+
+<h2>8400-Statistical</h2 =====================================================>
+<br>
+<b>Statistical functions</b><br>
+<br>
+SymCalc also includes some statistical functions that allow you to compute statistics. Every statistical function requires a list of values. This can be multiple parameters, cell references, cell ranges or a combination of all this.<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>MIN</b>(list)<br>
+returns the smallest of all values in the list<br>
+<br>
+Example:<br>
+<t1>MIN(1;2;3;4)<br>
+Result:<br>
+<t1>1<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>MAX</b>(list)<br>
+returns the largest of all values in the list<br>
+<br>
+Example:<br>
+<t1>MAX(1;2;3;4)<br>
+Result:<br>
+<t1>4<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>SUM</b>(list)<br>
+returns the sum of all values in the list<br>
+<br>
+Example:<br>
+<t1>SUM(1;2;3;4)<br>
+Result:<br>
+<t1>10<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>AVERAGE</b>(list)<br>
+returns the average of all values in the list<br>
+<br>
+Example:<br>
+<t1>AVERAGE(1;2;3;4)<br>
+Result:<br>
+<t1>2,5<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>COUNT</b>(list)<br>
+returns the count of numeric values<br>
+<br>
+Example:<br>
+<t1>COUNT(1;2;3;4)<br>
+Result:<br>
+<t1>4<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>STDEV</b>(list)<br>
+returns the standard deviation of all values in the list<br>
+<br>
+Example:<br>
+<t1>STDEV(1;2;3;4)<br>
+Result:<br>
+<t1>1,29099445<br>
+<br>
+
+
+<h2>8500-Financial</h2 =======================================================>
+<br>
+<b>FINANCIAL FUNCTIONS</b><br>
+<br>
+Financial functions allow you to perform financial computations like present and future value without the use of long or complex formulas.<br>
+<br>
+Most common parameters are "rate", which presents an interest or dicount rate, and "nper", which stands for "number of periods" and presents the number of payments or incomes in total or in an annuity.<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>PV</b>(rate;nper;payment)<br>
+calculates the present value of a loan or an investment, based on a constant interest rate<br>
+<br>
+Parameters:<br>
+<t1><b>rate</b>     <t8>interest rate per period<br>
+<t1><b>nper</b>     <t8>total number of payment<br>
+                    <t8>periods in an annuity<br>
+<t1><b>payment</b>  <t8>payment made each period and<br>
+                    <t8>cannot change over the life<br>
+                    <t8>of the annuity<br>
+<br>
+Example:<br>
+<t1>PV(7%;1;1,04)<br>
+Result:<br>
+<t1>0,971962614<br>
+<br>
+Formula used:<br>
+<t1>PV=payment*((1-(1+rate)^nper)/rate)<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>PMT</b>(rate;nper;value)<br>
+calculates the payment for a loan based on constant payments and a constant interest rate<br>
+<br>
+Parameters:<br>
+<t1><b>rate</b>     <t8>interest rate for the loan<br>
+<t1><b>nper</b>     <t8>total number of payments for<br>
+                    <t8>the loan<br>
+<t1><b>value</b>    <t8>present value, or the total<br>
+                    <t8>amount that a series of<br>
+                    <t8>future payments is worth now;<br>
+                    <t8>also known as the principal<br>
+<br>
+Example:<br>
+<t1>PMT(15%/12;5*12;10000)<br>
+Result:<br>
+<t1>237,899299<br>
+<br>
+Formula used:<br>
+<t1>PMT=value*(rate/(1-(1+rate)^(0-nper))<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>FV</b>(rate;nper;payment)<br>
+calculates the future value of an investment based on a constant interest rate<br>
+<br>
+Parameters:<br>
+<t1><b>rate</b>     <t8>interest rate per period<br>
+<t1><b>nper</b>     <t8>total number of payment<br>
+                    <t8>periods in an annuity<br>
+<t1><b>payment</b>  <t8>payment made each period and<br>
+                    <t8>cannot change over the life<br>
+                    <t8>of the annuity<br>
+<br>
+Example:<br>
+<t1>FV(0,75%;48;100)<br>
+Result:<br>
+<t1>5752,07094<br>
+<br>
+Formula used:<br>
+<t1>FV=payment*(((1+rate)^nper-1)/rate)<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>RATE</b>(nper;present;future)<br>
+returns the interest rate per period of an annuity<br>
+<br>
+Parameters:<br>
+<t1><b>nper</b>     <t8>total number of payment<br>
+                    <t8>periods in an annuity<br>
+<t1><b>present</b>  <t8>present value, the total<br>
+                    <t8>amount that a series of<br>
+                    <t8>future payments is worth now<br>
+<t1><b>future</b>   <t8>future value, or a cash<br>
+                    <t8>balance you want to attain<br>
+                    <t8>after the last payment is<br>
+                    <t8>made<br>
+<br>
+Example:<br>
+<t1>RATE(3;1000;1500)<br>
+Result:<br>
+<t1>0,144714243<br>
+<br>
+Formula used:<br>
+<t1>RATE=((future/present)^(1/nper))-1<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>NPER</b>(rate;payment;value)<br>
+Returns the number of periods for an investment based on periodic, constant payments and a constant interest rate<br>
+<br>
+Parameters:<br>
+<t1><b>rate</b>     <t8>interest rate per period<br>
+<t1><b>payment</b>  <t8>payment made each period and<br>
+                    <t8>cannot change over the life<br>
+                    <t8>of the annuity<br>
+<t1><b>value</b>    <t8>future value, or a cash<br>
+                    <t8>balance you want to attain<br>
+                    <t8>after the last payment is<br>
+                    <t8>made<br>
+<br>
+Example:<br>
+<t1>NPER(10%;500;10000)<br>
+Result:<br>
+<t1>11,5267046<br>
+<br>
+Formula used:<br>
+<t1>NPER=<br>
+<t1>(ln(1+(value*(rate/payment))))/ln(1+rate)<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>NPV</b>(rate;list)<br>
+calculates the net present value of an investment by using a discount rate and a series of future income
+<br>
+Parameters:<br>
+<t1><b>rate</b>     <t8>rate of discount over the<br>
+                    <t8>length of one period<br>
+<t1><b>list</b>     <t8>list of income required at<br>
+                    <t8>each end of a period<br>
+<br>
+Example:<br>
+<t1>NPV(15%;15000;19500;25350;32955;42841,5)<br>
+Result:<br>
+<t1>84598,2417<br>
+<br>
+Formula used:<br>
+<t1>NPV=sum i[1-n](list[i]/(1+rate)^i)<br>
+<br>
+
+
+<h2>8600-Logical</h2 =========================================================>
+<br>
+<b>LOGICAL FUNCTIONS</b><br>
+<br>
+With logical functions you can proceed boolean operations in SymCalc. A value equal zero (0) is handled as "false", while any other values are handled as "true".<br>
+<br>
+Some functions require a list of values. This can be multiple parameters, cell references, cell ranges or a combination of all this.<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>AND</b>(list)<br>
+returns only true (=1), if all values are not 0; otherwise it will return false (=0)<br>
+<br>
+Parameters:<br>
+<t1><b>list</b>    <t8>list of values (true/false)<br>
+<br>
+Example:<br>
+<t1>AND(1;3<4;TRUE())<br>
+Result:<br>
+<t1>1<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>OR</b>(list)<br>
+returns only false (=0), if all values are 0; otherwise it will return true (=1)<br>
+<br>
+Parameters:<br>
+<t1><b>list</b>    <t8>list of values (true/false)<br>
+<br>
+Example:<br>
+<t1>OR(TRUE();12=13;FALSE())<br>
+Result:<br>
+<t1>1<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>NOT</b>(value)<br>
+Returns the opposite of the boolean value, false (=0) if the value is true, true (=1) if the value is false<br>
+<br>
+Parameters:<br>
+<t1><b>value</b>   <t8>boolean value (true/false)<br>
+<br>
+Example:<br>
+<t1>NOT(10>1)<br>
+Result:<br>
+<t1>0<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>IF</b>(condition;true_value;false_value)<br>
+returns the condition-dependant value<br>
+<br>
+Parameters:<br>
+<t1><b>condition</b>    <t8>condition (0=false,<br>
+                        <t8>otherwise true)<br>
+<t1><b>true_val</b>     <t8>result, if condition&lt;>0<br>
+<t1><b>false_val</b>    <t8>result, if condition=0<br>
+<br>
+Example:<br>
+<t1>IF(10>100;123;456)<br>
+Result:<br>
+<t1>456<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>TRUE</b>()<br>
+returns true (=1)<br>
+<br>
+Parameters: none<br>
+<br>
+Example:<br>
+<t1>TRUE()<br>
+Result:<br>
+<t1>1<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>FALSE</b>()<br>
+returns false (=0)<br>
+<br>
+Parameters: none<br>
+<br>
+Example:<br>
+<t1>FALSE()<br>
+Result:<br>
+<t1>0<br>
+<br>
+
+
+<h2>8700-Date and time</h2 ===================================================>
+<br>
+<b>DATE AND TIME FUNCTIONS</b><br>
+<br>
+(check the <u 3410>Datetime Values</u> and the <u 3400>Number Input Formats</u> chapter as well)<br>
+<br>
+SymCalc provides a powerful set of functions for handling all kind of date and time data. You can both generate new date and time expressions, do calculations regarding datetime differences or get a component from a datetime expression like the minute or month etc.<br>
+<br>
+"Datetime" is the combination of a date and a time expression. Stand alone "time" expressions are using a zero date (which is just 1980-1-1), stand alone "date" expressions a zero time (which is 00:00:00). Of course leap years are respected in any calculations.<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>DATE</b>(year;month;day)<br>
+returns a datetime date<br>
+<br>
+Parameters:<br>
+<t1><b>year</b> <t8>(1980-2047)<br>
+<t1><b>month</b><t8>(1-12)<br>
+<t1><b>day</b>  <t8>(1-31)<br>
+<br>
+Example:<br>
+<t1>DATE(2024;8;31)<br>
+Result:<br>
+<t1>31.08.2024<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>TIME</b>(hour;minute;second)<br>
+returns a datetime time<br>
+<br>
+Parameters:<br>
+<t1><b>hour</b>  <t8>(0-23)<br>
+<t1><b>minute</b><t8>(0-59)<br>
+<t1><b>second</b><t8>(0-59)<br>
+<br>
+Example:<br>
+<t1>TIME(23;57;19)<br>
+Result:<br>
+<t1>23:57:19<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>DATETIME</b>(year;month;day;hour;minute;second)<br>
+generates a full datetime<br>
+<br>
+Parameters:<br>
+<t1><b>year</b>  <t8>(1980-2047)<br>
+<t1><b>month</b> <t8>(1-12)<br>
+<t1><b>day</b>   <t8>(1-31)<br>
+<t1><b>hour</b>  <t8>(0-23)<br>
+<t1><b>minute</b><t8>(0-59)<br>
+<t1><b>second</b><t8>(0-59)<br>
+<br>
+Example:<br>
+<t1>DATETIME(2024;8;31;23;57;19)<br>
+Result:<br>
+<t1>31.08.2024 23:57:19<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>YEAR</b>(datetime)<br>
+returns the year of a date or datetime (1980-2047)<br>
+<br>
+Parameters:<br>
+<t1><b>datetime</b><br>
+<br>
+Example:<br>
+<t1>YEAR(@2024.8.31_23:57:19)<br>
+Result:<br>
+<t1>2024<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>MONTH</b>(datetime)<br>
+returns the month of a date or datetime (1-12)<br>
+<br>
+Parameters:<br>
+<t1><b>datetime</b><br>
+<br>
+Example:<br>
+<t1>MONTH(@2024.8.31_23:57:19)<br>
+Result:<br>
+<t1>8<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>DAY</b>(datetime)<br>
+returns the day of a date or datetime (1-31)<br>
+<br>
+Parameters:<br>
+<t1><b>datetime</b><br>
+<br>
+Example:<br>
+<t1>DAY(@2024.8.31_23:57:19)<br>
+Result:<br>
+<t1>31<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>WEEKDAY</b>(datetime)<br>
+returns the weekday of a date or datetime (0-6); in SymCalc a week starts with monday, so 0 means monday, 1 means tuesday and 6 means sunday<br>
+<br>
+Parameters:<br>
+<t1><b>datetime</b><br>
+<br>
+Example:<br>
+<t1>WEEKDAY(@2024.8.31_23:57:19)<br>
+Result:<br>
+<t1>5<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>HOUR</b>(datetime)<br>
+returns the hour of a time or datetime (0-23)<br>
+<br>
+Parameters:<br>
+<t1><b>datetime</b><br>
+<br>
+Example:<br>
+<t1>HOUR(@2024.8.31_23:57:19)<br>
+Result:<br>
+<t1>23<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>MINUTE</b>(datetime)<br>
+returns the minute of a time or datetime (0-59)<br>
+<br>
+Parameters:<br>
+<t1><b>datetime</b><br>
+<br>
+Example:<br>
+<t1>MINUTE(@2024.8.31_23:57:19)<br>
+Result:<br>
+<t1>57<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>SECOND</b>(datetime)<br>
+returns the second of a time or datetime (0-59)<br>
+<br>
+Parameters:<br>
+<t1><b>datetime</b><br>
+<br>
+Example:<br>
+<t1>SECOND(@2024.8.31_23:57:19)<br>
+Result:<br>
+<t1>19<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>DATE_ADD</b>(datetime;years;months;days)<br>
+adds any positive or negative amount of years, months and days to a date or datetime<br>
+<br>
+Parameters:<br>
+<t1><b>datetime</b> <t8>date or datetime<br>
+<t1><b>years</b>    <t8>years (signed)<br>
+<t1><b>months</b>   <t8>months (signed)<br>
+<t1><b>days</b>     <t8>days (signed)<br>
+<br>
+Example:<br>
+<t1>DATE_ADD(@2020.1.2;3;4;5)<br>
+Result:<br>
+<t1>7.5.2023<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>TIME_ADD</b>(datetime;hours;minutes;seconds)<br>
+adds any positive or negative amount of hours, minutes and seconds to a time or datetime<br>
+<br>
+Parameters:<br>
+<t1><b>datetime</b> <t8>time or datetime<br>
+<t1><b>hours</b>    <t8>hours (signed)<br>
+<t1><b>minutes</b>  <t8>minutes (signed)<br>
+<t1><b>seconds</b>  <t8>seconds (signed)<br>
+<br>
+Example:<br>
+<t1>TIME_ADD(_16:32:08;3;4;5)<br>
+Result:<br>
+<t1>19:35:13<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>YEARS</b>(datetime2;datetime1)<br>
+returns the number of years between two dates or datetimes; you can use this for calculating an age<br>
+<br>
+Parameters:<br>
+<t1><b>datetime2</b>  <t8>end date or datetime<br>
+<t1><b>datetime1</b>  <t8>start date or datetime<br>
+<br>
+Example:<br>
+<t1>YEARS(@2024.1.2;@2020.1.2)<br>
+Result:<br>
+<t1>4<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>MONTHS</b>(datetime2;datetime1)<br>
+returns the number of months between two dates or datetimes<br>
+<br>
+Parameters:<br>
+<t1><b>datetime2</b>  <t8>end date or datetime<br>
+<t1><b>datetime1</b>  <t8>start date or datetime<br>
+<br>
+Example:<br>
+<t1>MONTHS(@2024.9.3;@2024.4.3)<br>
+Result:<br>
+<t1>5<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>DAYS</b>(datetime2;datetime1)<br>
+returns the number of days between two dates or datetimes<br>
+<br>
+Parameters:<br>
+<t1><b>datetime2</b>  <t8>end date or datetime<br>
+<t1><b>datetime1</b>  <t8>start date or datetime<br>
+<br>
+Example:<br>
+<t1>DAYS(@2024.12.31;@2024.12.3)<br>
+Result:<br>
+<t1>28<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>HOURS</b>(datetime2;datetime1)<br>
+returns the number of hours between two times or datetimes<br>
+<br>
+Parameters:<br>
+<t1><b>datetime2</b>  <t8>end time or datetime<br>
+<t1><b>datetime1</b>  <t8>start time or datetime<br>
+<br>
+Example:<br>
+<t1>HOURS(_13:57:22;_03:57:22;)<br>
+Result:<br>
+<t1>10<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>MINUTES</b>(datetime2;datetime1)<br>
+returns the number of minutes between two times or datetimes<br>
+<br>
+Parameters:<br>
+<t1><b>datetime2</b>  <t8>end time or datetime<br>
+<t1><b>datetime1</b>  <t8>start time or datetime<br>
+<br>
+Example:<br>
+<t1>MINUTES(_13:57:22;_13:27:22)<br>
+Result:<br>
+<t1>30<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>SECONDS</b>(datetime2;datetime1)<br>
+returns the number of seconds between two times or datetimes<br>
+<br>
+Parameters:<br>
+<t1><b>datetime2</b>  <t8>end time or datetime<br>
+<t1><b>datetime1</b>  <t8>start time or datetime<br>
+<br>
+Example:<br>
+<t1>SECONDS(_13:57:52;_13:57:12;)<br>
+Result:<br>
+<t1>40<br>
+<br>
+
+
+<h2>8800-Table</h2 ===========================================================>
+<br>
+<b>TABLE FUNCTIONS</b><br>
+<br>
+Table functions are currently limited to column and row position constants.<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>COLUMN</b>()<br>
+returns the column as a number (A=1, B=2, etc)<br>
+<br>
+Parameters: none<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>ROW</b>()<br>
+returns the row as a number (1, 2, etc)<br>
+<br>
+Parameters: none<br>
+<br>

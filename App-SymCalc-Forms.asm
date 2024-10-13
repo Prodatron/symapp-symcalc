@@ -23,12 +23,12 @@ maitittxt   db "untitled - SymCalc",0:ds 12-8
 ;==============================================================================
 
 ;main
-menmaidat   dw 7, 1+4,menmaitxt1, menmaidat1,0
+menmaidat   dw 6, 1+4,menmaitxt1, menmaidat1,0
             dw    1+4,menmaitxt2, menmaidat2,0
             dw    1+4,menmaitxt3, menmaidat3,0
             dw    1+4,menmaitxt4, menmaidat4,0
             dw    1+4,menmaitxt5, menmaidat5,0
-            dw    1+4,menmaitxt6, menmaidat6,0
+            ;dw    1+4,menmaitxt6, menmaidat6,0
             dw    1+4,menmaitxt7, menmaidat7,0
 
 menmaidat1  dw 11,1,menmaitxt11,filnew,0, 1,menmaitxt12,filopn,0, 1,menmaitxt13,filsav,0, 1,menmaitxt14,filsas,0, 1+8,0,0,0, 1+4,menmaitxt15,menmaidat15,0, 1+4,menmaitxt16,menmaidat16,0
@@ -36,11 +36,11 @@ menmaidat1  dw 11,1,menmaitxt11,filnew,0, 1,menmaitxt12,filopn,0, 1,menmaitxt13,
 menmaidat15 dw 2, 1,menmaitxt151,filimc,0,1,menmaitxt152,filims,0
 menmaidat16 dw 2, 1,menmaitxt151,filexc,0,1,menmaitxt152,filexs,0
 
-menmaidat2  dw 8, 1,menmaitxt21,copcut,0, 1,menmaitxt22,copcop,0
+menmaidat2  dw 8 ,1,menmaitxt21,copcut,0, 1,menmaitxt22,copcop,0
 menmaidat2a dw    0,menmaitxt23,coppst,0, 1+8,0,0,0, 1,menmaitxt24,fldclr,0, 1+8,0,0,0, 1,menmaitxt25,mrkall,0, 1+4,menmaitxt26,menmaidat26,0
 menmaidat26 dw 2, 1,menmaitxt261,mencsl,0,1,menmaitxt262,menrsl,0
 
-menmaidat3  dw 2, 1+2,menmaitxt31,mentol,0, 1+2,menmaitxt32,mensta,0
+menmaidat3  dw 4, 1+2,menmaitxt31,mentol,0, 1+2,menmaitxt32,mensta,0, 1+8,0,0,0, 1,menmaitxt33,cfgopn,0
 
 menmaidat4  dw 7, 1+4,menmaitxt41,menmaidat41,0,1+4,menmaitxt42,menmaidat42,0,1+4,menmaitxt43,menmaidat43,0, 1+8,0,0,0, 1,menmaitxt44 ,cfdopn,0,1+4,menmaitxt45,menmaidat45,0,1+4,menmaitxt46,menmaidat46,0
 menmaidat41 dw 3, 1,menmaitxt411,mensnr,0,1,menmaitxt412,mensbl,0,1,menmaitxt413,mensit,0
@@ -53,7 +53,7 @@ menmaidat5  dw 9, 1+4,menmaitxt51,menmaidat51,0, 1,menmaitxt52,movrwi,0, 1,menma
 menmaidat51 dw 4, 1,menmaitxt511, movcid, 0, 1,menmaitxt512, movcir, 0, 1,menmaitxt513, movrwi, 0, 1,menmaitxt514, movcli, 0
 menmaidat54 dw 4, 1,menmaitxt541, movcru, 0, 1,menmaitxt542, movcrl, 0, 1,menmaitxt543, movrwr, 0, 1,menmaitxt544, movclr, 0
 
-menmaidat6  dw 1, 1,menmaitxtx ,000000,0
+;menmaidat6  dw 1, 1,menmaitxtx ,000000,0
 menmaidat7  dw 3, 1,menmaitxt71,prghlp,0, 1+8,0,0,0, 1,menmaitxt72,prginf,0
 
 menmaitxt1  db "File",0
@@ -81,6 +81,7 @@ menmaitxt262 db "Row",0
 menmaitxt3  db "View",0
 menmaitxt31 db "Tool bar",0
 menmaitxt32 db "Status bar",0
+menmaitxt33 db "Preferences...",0
 
 menmaitxt4  db "Format",0
 menmaitxt41 db "Style",0
@@ -125,51 +126,16 @@ menmaitxt55 db "Remove row(s)",0
 menmaitxt56 db "Remove column(s)",0
 menmaitxt57 db "Clear cell content",0
 
-menmaitxt6  db "Data",0
+;menmaitxt6  db "Data",0
 
 menmaitxt7  db "?",0
 menmaitxt71 db "Help topics",0
 menmaitxt72 db "About",0
 
-menmaitxtx  db "Coming soon...",0
+;menmaitxtx  db "Coming soon...",0
 
 
 ;### ALERT WINDOW #############################################################
-
-prgtxtinf   dw prgtxtinf1,4*1+2,prgtxtinf2,4*1+2,prgtxtinf3,4*1+2,0,prgicnbig,prgicn16c
-prgtxtinf1  db "SymCalc Spreadsheet",0
-prgtxtinf2  db " Version 0.8 (Build "
-read "..\..\..\SRC-Main\build.asm"
-            db "pdt)",0
-prgtxtinf3  db " Copyright <c> 2024 SymbiosiS"
-prgtxtinf0  db 0
-
-prgtxtsav   dw prgtxtsav1,4*1+2,prgtxtinf0,4*1+2,prgtxtinf0,4*1+2
-prgtxtsav1  db "Save changes?",0
-
-;error - load/save
-prgerrinfa  dw prgerrtxt1a,4*1+2,prgerrtxt2a,4*1+2,prgerrtxt3a,4*1+2
-prgerrinfb  dw prgerrtxt1a,4*1+2,prgerrtxt2b,4*1+2,prgerrtxt3b,4*1+2
-prgerrinfc  dw prgerrtxt1a,4*1+2,prgerrtxt2c,4*1+2,prgerrtxt3c,4*1+2
-prgerrinfd  dw prgerrtxt1a,4*1+2,prgerrtxt2d,4*1+2,prgerrtxt3d,4*1+2
-prgerrinfe  dw prgerrtxt1a,4*1+2,prgerrtxt2e,4*1+2,prgerrtxt3e,4*1+2
-
-prgerrtxt1a db "Error while loading:",0
-prgerrtxt1b db "Error while saving:",0
-
-prgerrtxt2a db "A disc error occured",0
-prgerrtxt2b db "Wrong file format",0
-prgerrtxt2c db "New unsupported version",0
-prgerrtxt2d db "Corrupt file",0
-prgerrtxt2e db "Memory full",0
-
-prgerrtxt3a db "(see symbos.org/err.htm#"
-prgerrtxt3a0 db "##)",0
-prgerrtxt3b equ prgtxtinf0
-prgerrtxt3c db "Please upgrade SymCalc",0
-prgerrtxt3d equ prgtxtinf0
-prgerrtxt3e db "Please upgrade your machine",0
-
 
 errforinf0  equ 00
 errforinf1  equ 01
@@ -185,30 +151,36 @@ errmeminfa  equ 10
 errmeminfb  equ 11
 errmeminfc  equ 12
 errmeminfd  equ 13
+errlodinfa  equ 14
+errlodinfb  equ 15
+errlodinfc  equ 16
+errlodinfd  equ 17
+errlodinfe  equ 18
+prgmsgsav   equ 24
+prgmsginf   equ 25
 
 
 ;==============================================================================
 ;### BOOT WINDOW ##############################################################
 ;==============================================================================
 
-winbotdat    dw #0081,4+8+16,58+63,70, 108, 63,0,0, 108, 63, 108, 63, 108, 63,0,0,0,0,winbotgrp,0,0:ds 136+14
+winbotdat    dw #0081,4+8+16, 0,0, 188, 80,0,0, 188, 80, 188, 80, 188, 80,0,0,0,0,winbotgrp,0,0:ds 136+14
 
-winbotgrp    db 5,0: dw winbotrec,0,0:db 6,7:dw 0,0,0
+winbotgrp    db 7,0: dw winbotrec,0,0:db 6,7:dw 0,0,0
 winbotrec
-dw      0,255*256+ 0,1+128,     0, 0,1000,1000,0
-dw      0,255*256+ 2,128+#6600, 0, 0, 108,  63,0
+dw      0,255*256+ 0,1+128,    0,0,1000,1000,0
+dw      0,255*256+ 2,128+#6600,0,0, 188,  80,0
+dw      0,255*256+10,botlog,    16,18,156,20,0
 
-dw      0,255*256+ 1,ctrbot1, 0, 9, 108,   9,0
-dw      0,255*256+ 1,ctrbot2, 0,28, 108,   9,0
-dw      0,255*256+ 1,ctrbot3, 0,46, 108,   9,0
+dw      0,255*256+ 1,ctrbot1,16, 6, 156,   8,0
+dw      0,255*256+ 1,ctrbot2,16,42, 156,   8,0
+dw      0,255*256+ 1,ctrbot3,16,54, 156,   8,0
+dw      0,255*256+ 1,ctrbot4,16,66, 156,   8,0
 
-ctrbot1 dw txtbot1:db 16*8+1,2+128
-ctrbot2 dw txtbot2:db 16*2+1,2+128
-ctrbot3 dw txtbot3:db 16*6+1,2+128
-
-txtbot1 db "SymCalc",0
-txtbot2 db "(c) 2024 SymbiosiS",0
-txtbot3 db "Loading...",0
+ctrbot1 dw txtbot1:db 16*7+1,2+128
+ctrbot2 dw txtbot2:db 16*6+1,2+128
+ctrbot3 dw txtbot3:db 16*8+1,2+128
+ctrbot4 dw txtbot4:db 16*4+1,2+128
 
 
 ;==============================================================================
@@ -286,19 +258,20 @@ dw     00,255*256+00,0         ,0,0,0,0,0   ;01=Background Sheet
 dw     00,255*256+00,2         ,0,0,0,0,0   ;02=Background Bottom
 
 winmairec_formu equ 3
-dw     00,255*256+32,ctrfrminp ,0,0,0,0,0   ;07=Formline Input
+dw     00,255*256+32,ctrfrminp ,0,0,0,0,0   ;03=Formline Input
+
+winmairec_next  equ 4
 dw     00,255*256+10,arrdwngfx ,0,0,0,0,0   ;04=Formline Field Select
 dw     00,255*256+10,gfxfrma   ,0,0,0,0,0   ;05=Formline Function Select
 dw     00,255*256+01,ctrfrmoky ,0,0,0,0,0   ;06=Formline Input OK
 winmairec_fpos  equ 7
-dw     00,255*256+32,ctrcelinp ,0,0,0,0,0   ;03=Formline Field Input
+dw     00,255*256+32,ctrcelinp ,0,0,0,0,0   ;07=Formline Field Input
 winmairec2
 dw barccl,000*256+25,000000000 ,0,0,0,0,0   ;08=Bar Columns
 dw barcrw,000*256+25,000000000 ,0,0,0,0,0   ;09=Bar Rows
 winmairec_field equ 10  ;**onchange -> set in SymCalc-Extend as well!**
 winmairec1
 dw fldclk,255*256+25,supcelctr ,0,0,0,0,0   ;10=Sheet Cells
-
 dw mrkall,255*256+19,0         ,0,0,0,0,0   ;11=MarkAll
 
 wincnt_all  equ 15
@@ -311,6 +284,7 @@ dw     00,255*256+01,ctrbotinf ,0,0,0,0,0   ;14=Bottom Text
 
 ctrbotinf   dw txtbotinf,256*1+2+4+128
 txtbotinf   db "Sum ":ds 40
+txtbotbsy   db "Calculating...",0
 
 ctrfrmoky   dw txtfrmoky,2+4
 txtfrmoky   db "=",0

@@ -1,7 +1,7 @@
 ;@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ;@                                                                            @
 ;@                               S y m C a l c                                @
-;@              (extend 1 - cell hash table, dialogues, config)               @
+;@       (extend 1 - cell hash table, dialogues, config, import/export)       @
 ;@                                                                            @
 ;@             (c) 2024-2024 by Prodatron / SymbiosiS (Jörn Mika)             @
 ;@                                                                            @
@@ -83,6 +83,8 @@
 ;### PRPGET -> loads from list/config into editor
 ;### PRPPUT -> saves from editor into config
 ;### PRPTYP -> unit/format list clicked
+;### PRPUP  -> move list entry up
+;### PRPDWN -> move list entry down
 ;### PRPOKY -> saves document properties
 ;### PRPDEF -> sets default document config and clears meta data
 ;### PRPSAV -> saves meta data into opened file
@@ -90,11 +92,34 @@
 ;### PRPUNC -> unpacks meta data
 ;### PRPCPR -> packs meta data
 
+;--- EXCHANGE (IMPORT/EXPORT) FILEFORMATS -------------------------------------
+;### XCHBFR -> reset buffer
+;### XCHDEC -> dialogue for CSV format export
+;### XCHDIC -> dialogue for CSV format import
+;### XCHBRW -> browses for a file
+;### XCHEXC -> exports CSV
+;### XCHLIM -> check, if cell content contains field limiter
+;### XCHLMG -> get delimiters
+;### XCHWRT -> writes into file output buffer
+;### XCHERR -> error during import/export
+;### XCHIPC -> imports CSV from command line parameter
+;### XCHIMC -> imports CSV
+;### XCHIMS -> imports SYLK
+;### XCHRED -> read next field from file
+;### XCHLFD -> (get char and) check for linefeed
+;### XCHCHR -> read char from file
+;### XCHEXS -> exports SYLK
+;### XCHSFL -> starts new field in sylk record
+;### XCHSNM -> adds decimal number to sylk record
+;### XCHSEC -> escape sylk text (replaces ";" with ";;")
+;### XCHSUC -> unescape sylk text (replaces ";;" with ";")
+
 ;--- SUB ROUTINES -------------------------------------------------------------
 ;### PRGFIL -> Generates config file path
 ;### STRLEN -> get string length
 ;### STRINI -> inits string input control
 ;### CHRTRM -> check for terminator
+;### CHRUCS -> uppercase
 ;### CNV08S -> converts 8bit to decimal string
 ;### CNV32S -> Converts 32Bit-number (unsigned) to string (terminated by 0)
 ;### CNVS16 -> converts string into number
@@ -677,7 +702,7 @@ dw barsdia:_barsdia equ 09
 dw barsdib:_barsdib equ 10
 dw 0                  ; 11
 dw 0                  ; 12
-dw 0                  ; 13
+dw fmtces :_fmtces  equ 13
 dw fmtcol :_fmtcol  equ 14
 dw fmtctb :_fmtctb  equ 15
 dw fmtc00 :_fmtc00  equ 16
@@ -703,16 +728,22 @@ dw prpcat :_prpcat  equ 35
 dw prptyp :_prptyp  equ 36
 dw prpup  :_prpup   equ 37
 dw prpdwn :_prpdwn  equ 38
-
 dw xchdec :_xchdec  equ 39
 dw xchdic :_xchdic  equ 40
-dw xchdes :_xchdes  equ 41
-dw xchdis :_xchdis  equ 42
-dw xchbrw :_xchbrw  equ 43
-dw xchexc :_xchexc  equ 44
-dw xchimc :_xchimc  equ 45
-dw xchexs :_xchexs  equ 46
-dw xchims :_xchims  equ 47
+dw xchbrw :_xchbrw  equ 41
+dw xchexc :_xchexc  equ 42
+dw xchimc :_xchimc  equ 43
+dw xchipc :_xchipc  equ 44
+dw xchexs :_xchexs  equ 45
+dw xchims :_xchims  equ 46
+dw cfgopn :_cfgopn  equ 47
+dw cfgoky :_cfgoky  equ 48
+dw cfgtab :_cfgtab  equ 49
+dw cfgreg :_cfgreg  equ 50
+dw cfgctp :_cfgctp  equ 51
+dw cfgcol :_cfgcol  equ 52
+dw prpcol :_prpcol  equ 53
+dw prpctp :_prpctp  equ 54
 
 
 ;==============================================================================
@@ -1167,11 +1198,22 @@ cfdopn  push de
         ld de,wincfddat     ;open window
         jp windia
 
-;### CFGPEN/PAP -> pen/paper selection
+;### CFGPAP -> paper selection
+cfdpap  ld iy,fmtvalcol+1
+        ld ix,wincfdrecc2
+        ld a,wincfdrecc_pap
+        ld hl,256*75+101
+        call cfdpen1
+        jp cfdprv
+
+;### CFGPEN -> pen selection
 cfdpen  ld iy,fmtvalcol+0
         ld ix,wincfdrecc1
         ld a,wincfdrecc_pen
         ld hl,256*75+14
+        call cfdpen1
+        jp cfdprv
+
 cfdpen1 push af
         push hl
         ld a,e
@@ -1191,21 +1233,12 @@ cfdpen1 push af
         pop de
         ld e,-2
         ld a,(windianum)
-        call SyDesktop_WININH
-        jp cfdprv
+        jp SyDesktop_WININH
 cfdpen2 ld c,0      ;c=a/15
 cfdpen3 sub 15
         ret c
         inc c
         jr cfdpen3
-cfdpap  ld iy,fmtvalcol+1
-        ld ix,wincfdrecc2
-        ld a,wincfdrecc_pap
-        ld hl,256*75+101
-        jr cfdpen1
-
-
-;### Input      A=type (0=date, 1=time, 2=boolean, 3=number, 4=bin/hex)
 
 ;### CFDMOD -> modify num tab for different types
 ;### Input      (ctrcfdcat...)=new type, (fmtvaltyp)=old type
@@ -1527,7 +1560,7 @@ fmtcol2 ld de,256*15+1
         or a
         jr z,fmtcol3
         ld l,h
-;l=colour, ix=control record
+;l=colour, ix=control record, de=x/yofs
 fmtcol3 ld a,(ix+16+6)
         ld (ix+00+6),a
         ld a,(ix+16+8)
@@ -1557,6 +1590,8 @@ fmtctb  ld hl,(fmtvalcol)
         jp guiret0
 
 ;### FMTCTB -> colour dropdown colour clicked
+fmtces  call winblr0
+        ld e, 0:jr fmtcst1
 fmtc00  xor a:  jr fmtcst
 fmtc01  ld a,01:jr fmtcst
 fmtc02  ld a,02:jr fmtcst
@@ -1572,7 +1607,7 @@ fmtc11  ld a,11:jr fmtcst
 fmtc12  ld a,12:jr fmtcst
 fmtc13  ld a,13:jr fmtcst
 fmtc14  ld a,14:jr fmtcst
-fmtc15  ld a,15:jr fmtcst
+fmtc15  ld a,15
 fmtcst  push af
         call winblr0
         pop bc
@@ -1638,6 +1673,7 @@ fmtctr4 ex de,hl
 ;### CONFIG ROUTINES ##########################################################
 ;==============================================================================
 
+align 2
 read"App-SymCalc-Config.asm"
 
 cfgdocdef   ds cfgdocend-cfgdocbeg
@@ -2031,6 +2067,10 @@ prpopn  call prpsta         ;build statistics
         call lstput
         pop af
         call prpcat1
+        ld a,-1             ;prepare colours
+        ld (wincolrec1+16+6),a
+        ld (wincolrec1+16+8),a
+        call prpctp1
         ld de,winprpdat     ;open window
         jp windia
 
@@ -2039,6 +2079,7 @@ prptabo db 0
 prptabt db winprpreca_cnt:dw winprpreca
         db winprprecb_cnt:dw winprprecb
         db winprprecc_cnt:dw winprprecc
+        db winprprecd_cnt:dw winprprecd
 
 prptab  ld a,(ctrprptab0)
         ld hl,prptabo
@@ -2111,29 +2152,15 @@ prpcat5 ld a,(hl)
 
 ;### PRPGET -> loads from list/config into editor
 ;### Output     ZF=1 no changes
-prpgetc db 0    ;changed flag
+prpgetc db 0    ;changed flag (0/1)
 
-prpgett dw cfgmskdat  ,ctrprpe1i:db 16:dw 0:db 0
-        dw cfgmsktim  ,ctrprpe1i:db 16:dw 0:db 0
+prpgett dw cfgmskdat  ,ctrprpe1i:db 16:dw 0        :db 0
+        dw cfgmsktim  ,ctrprpe1i:db 16:dw 0        :db 0
         dw cfgunibol  ,ctrprpe1i:db  8:dw ctrprpe2i:db 8
         dw cfguninum+8,flgprpfix:db  1:dw ctrprpe1i:db 7
         dw cfgunibin+8,flgprpfix:db  1:dw ctrprpe1i:db 7
 
-prpget  ld a,(prpvaltyp)
-        ld hl,(ctrprptyp+12)
-        add hl,hl:add hl,hl:add hl,hl
-        cp 4
-        jr nc,prpget1
-        add hl,hl
-prpget1 dec a
-        add a:add a:add a
-        ld c,a:ld b,0
-        ld ix,prpgett
-        add ix,bc
-        ld (prpadrtab),ix
-        ld c,(ix+0)
-        ld b,(ix+1)
-        add hl,bc
+prpget  call prpget8
         xor a
 prpget0 ld (prpadrcfg),hl
         ld (prpget3),a
@@ -2178,6 +2205,23 @@ prpget5 ldir
         ld (prpgetc),a
 prpget3 db 0
         ret
+;-> ix,(prpadrtab)=config infos, hl=adr of current element
+prpget8 ld a,(prpvaltyp)
+        ld hl,(ctrprptyp+12)
+        add hl,hl:add hl,hl:add hl,hl
+        cp 4
+        jr nc,prpget1
+        add hl,hl
+prpget1 dec a
+        add a:add a:add a
+        ld c,a:ld b,0
+        ld ix,prpgett
+        add ix,bc
+        ld (prpadrtab),ix
+        ld c,(ix+0)
+        ld b,(ix+1)
+        add hl,bc
+        ret
 
 ;### PRPPUT -> saves from editor into config
 ;### Output     ZF=1 no changes
@@ -2195,7 +2239,7 @@ prpput  db #3e:ex de,hl
 ;### PRPTYP -> unit/format list clicked
 prptyp  call prpput
         jp z,prptyp1
-        ld a,(prpvaltyp)
+prptyp0 ld a,(prpvaltyp)
         ld c,1
         call lstbld
         ld e,winprprecb_hlp
@@ -2205,19 +2249,88 @@ prptyp1 call prpget
         jp z,guiret0
         jp prpcat0
 
-prpup   ;...
-        jp jmp_bnkret
+;### PRPUP  -> move list entry up
+prpup   ld hl,ctrprptyp+12
+        inc (hl):dec (hl)
+        jp z,guiret0
+        push hl
+        call prpput
+        pop hl
+        dec (hl)
+        call prpdwn1        ;swap with previous
+prpup1  ld a,(hl)
+        ld ix,ctrprptyp
+        call lstput
+        jr prptyp0
 
-prpdwn  ;...
-        jp jmp_bnkret
+;### PRPDWN -> move list entry down
+prpdwn  ld hl,ctrprptyp+12
+        ld a,(ctrprptyp+0)
+        dec a
+        cp (hl)
+        jp z,guiret0
+        push hl
+        call prpput
+        pop hl
+        call prpdwn1        ;swap with next
+        inc (hl)
+        jr prpup1
+prpdwn1 push hl
+        call prpget8        ;ix=config infos, hl=adr of current element
+        ld a,(ix+4)
+        add (ix+7)
+        ld b,a
+        add l:ld e,a
+        ld a,0
+        adc h:ld d,a
+prpdwn2 ld a,(de)
+        ld c,(hl)
+        ld (hl),a
+        ld a,c
+        ld (de),a
+        inc de
+        inc hl
+        djnz prpdwn2
+        pop hl
+        ret
 
 ;### PRPOKY -> saves document properties
 prpoky  call prpput
         call wincls
         call cfgput
         ld l,ret_prpoky
-        ld de,(prpflgchg)
+        ld a,(prpflgchg)
+        ld e,a
         jp jmp_bnkret
+
+;### PRPCTP -> colour type has been clicked
+prpctp  call prpctp1
+        ld de,256*winprprecc_col+256-2
+        ld a,(windianum)
+        call SyDesktop_WININH
+        jp guiret0
+prpctp1 ld hl,(flgcfgcor)
+        ld h,0
+        ld bc,cfgcolpen
+        add hl,bc
+        ld l,(hl)
+        ld ix,winprprecc1
+        ld de,256*25+110
+        jp fmtcol3
+
+;### PRPCOL -> colour has been clicked
+prpcol  ld hl,prpflgchg
+        set 1,(hl)
+        ld iy,cfgcolpen
+        ld a,(flgcfgcor)
+        ld c,a
+        ld b,0
+        add iy,bc
+        ld ix,winprprecc1
+        ld a,winprprecc_col
+        ld hl,256*25+110
+        call cfdpen1
+        jp guiret0
 
 ;### PRPDEF -> sets default document config and clears meta data
 prpdef  call cfgget
@@ -2351,13 +2464,190 @@ prpcpr1 ld l,(ix+0)
 
 
 ;==============================================================================
+;### CONFIG (APPLICATION PREFERENCES) DIALOGUE ################################
+;==============================================================================
+
+;### CFGOPN -> opens config dialogue
+cfgopnt dw cfgfmtflt,cfgfmtbin,cfgfmthex
+
+cfgopn  call cfgget         ;load config
+        ld hl,cfgopnt       ;prepare formats
+        ld ix,ctrcfgdpl
+        ld b,3
+cfgopn1 ld e,(hl):inc hl
+        ld d,(hl):inc hl
+        ld a,(de)
+        and #38
+        jr z,cfgopn2
+        ld a,1
+cfgopn2 ld (ix+17),a
+        inc de
+        ld a,(de)
+        ld c,a
+        and 7
+        inc a
+        and 7
+        ld (ix+12),a
+        ld a,c
+        and 8
+        rrca:rrca:rrca
+        ld (ix+16),a
+        ld de,18
+        add ix,de
+        djnz cfgopn1
+        call cfgopn3
+        ld ix,ctrcfgbgi
+        call strini
+        ld hl,txtcfgswi     ;prepare sizes
+        ld ix,ctrcfgswi
+        ld a,(cfgcelxln)
+        call cfgopn4
+        ld hl,txtcfgshi
+        ld ix,ctrcfgshi
+        ld a,(cfgcelyln)
+        call cfgopn4
+        ld a,-1             ;prepare colours
+        ld (wincolrec1+16+6),a
+        ld (wincolrec1+16+8),a
+        call cfgctp1
+        ld de,wincfgdat     ;open window
+        jp windia
+cfgopn3 ld ix,ctrcfgdsi
+        call strini
+        ld ix,ctrcfgdgi
+        jp strini
+cfgopn4 call cnv08s
+        ld (hl),0
+        jp strini
+
+;### CFGTAB -> preferences tab pressed
+cfgtabo db 0
+cfgtabt db wincfgreca_cnt:dw wincfgreca
+        db wincfgrecb_cnt:dw wincfgrecb
+
+cfgtab  ld a,(ctrcfgtab0)
+        ld hl,cfgtabo
+        ld de,wincfggrp
+        jp wintab
+
+;### CFGREG -> region preset entry selected
+cfgregt db ",." ;europe
+        db ".," ;english
+        db ".," ;asia
+        db ",." ;south
+        db ",'" ;switzerland
+
+cfgreg  ld a,(ctrcfgrgl+12)
+        sub 1
+        jp c,guiret0
+        add a
+        ld l,a:ld h,0
+        ld bc,cfgregt
+        add hl,bc
+        ld a,(hl):ld (cfgnumcom),a
+        inc hl
+        ld a,(hl):ld (cfgnumpoi),a
+        call cfgopn3
+        ld de,256*wincfgreca_sep+256-2
+        ld a,(windianum)
+        call SyDesktop_WININH
+        jp guiret0
+
+;### CFGOKY -> saves document properties
+cfgoky  call wincls
+        ld hl,cfgopnt       ;store format settings
+        ld ix,ctrcfgdpl
+        ld b,3
+cfgoky1 ld e,(hl):inc hl
+        ld d,(hl):inc hl
+        ld a,(ix+17)
+        or a
+        jr z,cfgoky2
+        ld a,3
+        sub b
+        add a:add a:add a
+cfgoky2 ld (de),a
+        inc de
+        ld a,(ix+16)
+        add a:add a:add a
+        ld c,a
+        ld a,(ix+12)
+        and 7
+        dec a
+        and 7
+        or c
+        ld c,a
+        ld a,(de)
+        and #f0
+        or c
+        ld (de),a
+        ld de,18
+        add ix,de
+        djnz cfgoky1
+        ld iy,txtcfgswi     ;store cell size
+        ld hl,cfgcelxln
+        call cfgoky3
+        ld iy,txtcfgshi
+        inc hl
+        call cfgoky3
+        call cfgput
+        jp guiret0
+cfgoky3 push hl
+        ld hl,barsdit
+        ld bc,1
+        ld de,126
+        call cnvs16
+        ld a,l
+        pop hl
+        ret c
+        ld (hl),a
+        ret
+
+;### CFGCTP -> colour type has been clicked
+cfgctp  call cfgctp1
+        ld de,256*wincfgrecb_col+256-2
+        ld a,(windianum)
+        call SyDesktop_WININH
+        jp guiret0
+cfgctp1 ld hl,(flgcfgcor)
+        ld h,0
+        ld bc,cfgapppen
+        add hl,bc
+        ld l,(hl)
+        ld ix,wincfgrecb1
+        ld de,256*25+110
+        jp fmtcol3
+
+;### CFGCOL -> colour has been clicked
+cfgcol  ld iy,cfgapppen
+        ld a,(flgcfgcor)
+        ld c,a
+        ld b,0
+        add iy,bc
+        ld ix,wincfgrecb1
+        ld a,wincfgrecb_col
+        ld hl,256*25+110
+        call cfdpen1
+        jp guiret0
+
+
+;==============================================================================
 ;### EXCHANGE (IMPORT/EXPORT) FILEFORMATS #####################################
 ;==============================================================================
 
 xchhnd  db 0        ;file handle
-xchdat  ds 255
-xchbfm  ds 1024     ;file buffer
-xchbfl  dw 0        ;current length
+        db "="  ;\
+xchdat  ds 255  ;/
+xchdln  db 0
+xchbmx  equ 1024    ;buffer max
+xchbuf  ds xchbmx   ;buffer memory
+xchbfl  dw 0        ;current buffer length
+xchbps  dw 0        ;current buffer position
+
+;### XCHBFR -> reset buffer
+xchbfr  ld hl,0
+        ld (xchbfl),hl
+        ret
 
 ;### XCHDEC -> dialogue for CSV format export
 xchdec  ld de,txtdectit     ;open export csv dialogue
@@ -2372,13 +2662,14 @@ xchdec1 ld (wincsvdat1),de
         ld (wincsvgrp),a
         ld a,ixl
         ld (ctrcsvlmd),a
-        ld (xchbrw0+1),iy
-        ld l,-1
-        call ibkcll:dw filbrw_
-        ld (xchbrw+1),hl
-        call xchbrw1
+        call xchdec2
         ld de,wincsvdat
         jp windia
+xchdec2 ld (xchbrw0+1),iy       ;iyl=type (6=sylk), iyh=load(0)/save(64)
+xchdec3 ld l,-1
+        call ibkcll:dw filbrw_
+        ld (xchbrw2+1),hl
+        jr xchbrw1
 
 ;### XCHDIC -> dialogue for CSV format import
 xchdic  ld de,txtdictit     ;open import csv dialogue
@@ -2389,22 +2680,8 @@ xchdic  ld de,txtdictit     ;open import csv dialogue
         ld iy,0*256+3
         jr xchdec1
 
-;### XCHDES -> dialogue for SYLK format export
-xchdes  ld de,windesdat     ;open export sylk dialogue
-        jp windia
-
-;### XCHDIS -> dialogue for SYLK format import
-xchdis  ld de,windisdat     ;open import sylk dialogue
-        jp windia
-
 ;### XCHBRW -> browses for a file
-xchbrw  ld de,0
-        ld hl,txtcsvfli
-        ld bc,256
-        call ibkput
-xchbrw0 ld hl,0
-        ld a,h
-        call ibkcll:dw filbrw_
+xchbrw  call xchbrw2
         or a
         jp nz,guiret0
         call xchbrw1
@@ -2412,29 +2689,38 @@ xchbrw0 ld hl,0
         ld a,(windianum)
         call SyDesktop_WININH
         jp guiret0
-xchbrw1 ld hl,(xchbrw+1)
+
+xchbrw2 ld de,0
+        ld hl,txtcsvfli
+        ld bc,256
+        call ibkput
+xchbrw0 ld hl,0
+        ld a,h
+        call ibkcll:dw filbrw_
+        ret
+xchbrw1 ld hl,(xchbrw2+1)
         ld de,txtcsvfli
         ld bc,256
         call ibkget
         ld ix,ctrcsvfli
         jp strini
 
+xchbrw3 ld iyl,6            ;iyh=load(0)/save(64) -> zf=1 txtcsvfli=path
+        call xchdec2
+        call xchbrw2
+        or a
+        ret nz
+        call xchbrw1
+        xor a
+        ret
+
 xchlstf db ";,",9," "
 xchlstt db 34,"'"
+xchlsti db 34,34, "'","'", 34,"'", 0,0
 
 ;### XCHEXC -> exports CSV
 xchexc  call wincls
-        ld hl,(ctrcsvlmd+12)        ;store text limiter
-        ld bc,xchlstt
-        add hl,bc
-        ld a,(hl)
-        ld (xchexc3+1),a
-        ld hl,(ctrcsvspd+12)        ;store field delimiter
-        ld bc,xchlstf
-        add hl,bc
-        ld a,(hl)
-        ld (xchlim+1),a
-        ld (xchexc6+1),a
+
         ld hl,flgcsvquc
         ld a,(hl):add a
         dec hl
@@ -2443,21 +2729,20 @@ xchexc  call wincls
         add (hl)
         ld (xchexc1+1),a
 
-        ld hl,0
-        ld de,256*fldmaxy+fldmaxx
-        call ibkcll:dw movopt_      ;BC=last column/row
+        call xchlmg
+        ld (xchlim+1),a
+        ld (xchexc6+1),a
+        ld bc,xchlstt
+        add hl,bc
+        ld a,(hl)
+        ld (xchexc3+1),a
+
+        call xchexc0
+        jp c,xcherr0
         ld a,c:ld (xchexc5+1),a
         ld a,b:ld (xchexc8+1),a
-        ld hl,txtcsvfli
-        ld ix,(App_BnkNum-1)
-        xor a
-        call SyFile_FILNEW
-        ld (xchhnd),a
-        ld a,1
-        jp c,xcherr0
-
-        ld (xcherr+1),sp
         ld hl,0                     ;HL=first column/row
+
 xchexc1 ld e,0
         push hl
         call ibkcll:dw celget_      ;L,H=cell, E=type (+1=as displayed, +2=formula) -> (celcnvtxt)=text, BC=length (without 0term), HL=celcnvtxt, A=type
@@ -2512,18 +2797,34 @@ xchexc8 ld a,0
         cp h
         jr nc,xchexc1
 
-        ld hl,#001a
+xchexca ld hl,#001a
         call xchexc9
 
         call xchwrt2
         ld a,(xchhnd)
         call SyFile_FILCLO
-        jr c,xcherr0
+        ld a,1
+        jp c,xcherr0
         jp guiret0
 
 xchexc9 ld (xchdat),hl
         ld c,2
         jr xchwrt
+
+xchexc0 ld hl,txtcsvfli
+        ld ix,(App_BnkNum-1)
+        xor a
+        call SyFile_FILNEW
+        ld (xchhnd),a
+        ld a,1
+        ret c
+        ld hl,0
+        ld de,256*fldmaxy+fldmaxx
+        call ibkcll:dw movopt_      ;BC=last column/row
+        ld (xcherr+1),sp
+        call xchbfr                 ;reset buffer
+        or a
+        ret
 
 ;### XCHLIM -> check, if cell content contains field limiter
 ;### Input      C=length
@@ -2541,6 +2842,15 @@ xchlim1 cp (hl)
 xchlim2 pop bc
         ret
 
+;### XCHLMG -> get delimiters
+;### Output     A=field delimiter, HL=text limiter index
+xchlmg  ld hl,(ctrcsvspd+12)        ;field delimiter
+        ld bc,xchlstf
+        add hl,bc
+        ld a,(hl)
+        ld hl,(ctrcsvlmd+12)        ;text limiter
+        ret
+
 ;### XCHWRT -> writes into file output buffer
 ;### Input      C=data length, xchdat=data
 ;### Ouput      CF=0 ok, CF=1 -> error while writing
@@ -2550,10 +2860,10 @@ xchwrt  ld b,0
         ld e,l:ld d,h
         add hl,bc
         bit 2,h
-        jr nz,xchwrt1       ;buffer >=1024
+        jr nz,xchwrt1       ;buffer >=xchbmx
         ld (xchbfl),hl
         ex de,hl
-        ld de,xchbfm
+        ld de,xchbuf
         add hl,de
         ex de,hl
         ld hl,xchdat
@@ -2564,7 +2874,7 @@ xchwrt1 push bc
         pop bc
         jr nc,xchwrt
         ret
-xchwrt2 ld hl,xchbfm
+xchwrt2 ld hl,xchbuf
         ld bc,(xchbfl)
         ld a,(App_BnkNum)
         ld e,a
@@ -2585,8 +2895,24 @@ xcherr  ld sp,0
 xcherr0 ;...alert
         jp guiret0
 
+;### XCHIPC -> imports CSV from command line parameter
+xchipc  call xchdec3                ;copy docpth to txtcsvfli
+        ld a,";"
+        ld hl,2         ;both ' and "
+        jr xchimc0
+
 ;### XCHIMC -> imports CSV
 xchimc  call wincls
+        call xchlmg
+
+xchimc0 ld (xchred3+1),a
+        add hl,hl
+        ld bc,xchlsti
+        add hl,bc
+        ld a,(hl):ld (xchred1+1),a
+        inc hl
+        ld a,(hl):ld (xchred2+1),a
+
         xor a
         call ibkcll:dw celimp_
         jp c,guiret0
@@ -2598,25 +2924,17 @@ xchimc  call wincls
         ld (xchhnd),a
         ld a,0
         jr c,xcherr0
-        ld hl,0
-        ld (xchbfl),hl
+        call xchbfr                 ;reset buffer
         ld (xcherr+1),sp
+
         ld hl,0                     ;HL=first column/row
 xchimc1 push hl
         call xchred                 ;read one field from CSV
         pop hl
         jr c,xchimc4
         jr z,xchimc3
-        push hl
-        ld hl,xchdat
-xchimc2 ld de,0
-        push bc
-        call ibkput
-        pop bc
-        pop hl
-        push hl
-        call ibkcll:dw celput_
-        pop hl
+        ld de,xchdat
+        call xchimc5
         ;jr c,...memful
         inc l
         ld a,fldmaxx
@@ -2632,29 +2950,412 @@ xchimc4 ld a,(xchhnd)
         ld a,1
         call ibkcll:dw celimp_
         jp guiret0
-
-xchdat  ds 255
-xchbfm  ds 1024     ;file buffer
-xchbfl  dw 0        ;current length
-
-;### XCHRED -> read next field from file
-;### Output     CF=1 -> EOF, ZF=1 -> next line, ZF=CF=0 -> xchdat=field, C=length (with 0term)
-xchred  ld hl,(xchbfl)
-        ld a,l:or h
-        ;jr nz,...
-        
+;hl=clm/row, bc=length, de=source
+xchimc5 push hl
+        ex de,hl
+xchimc2 ld de,0
+        ld b,0
+        push bc
+        call ibkput
+        pop bc
+        pop hl
+        push hl
+        call ibkcll:dw celput_
+        pop hl
         ret
 
+;### XCHIMS -> imports SYLK
+xchimsc db 0,0      ;x,y
+
+xchims  ld hl,256*0+0
+        ld (xchimsc),hl
+        ld iyh,0
+        call xchbrw3            ;zf=1 -> txtcsvfli=path
+        jp nz,guiret0
+        xor a
+        call ibkcll:dw celimp_
+        jp c,guiret0
+        ld (xchimc2+1),hl
+        ld a,34
+        ld (xchred1+1),a
+        ld (xchred2+1),a
+        ld a,";"
+        ld (xchred3+1),a
+        ld hl,txtcsvfli
+        ld ix,(App_BnkNum-1)
+        call SyFile_FILOPN
+        ld (xchhnd),a
+        ld a,0
+        jp c,xcherr0
+        call xchbfr             ;reset buffer
+        ld (xcherr+1),sp
+
+xchims1 call xchred                 ;read first field from new SYLK line
+        jp c,xchimc4            ;EOF -> finished
+        jr z,xchims1            ;only line feed -> try again
+        dec c:dec c
+        jr nz,xchims2
+        ld a,(xchdat)
+        cp "C"
+        jr z,xchims3
+xchims2 call xchred             ;unknown/unsupported -> skip line
+        jp c,xchimc4
+        jr nz,xchims2
+        jr xchims1
+
+xchims3 ld a,(xchred+1)         ;check eof/lf status after last field
+        cp 1
+        ld a,2
+        ld (xchred+1),a
+        jp c,xchimc4
+        jr z,xchims1
+        call xchlfd             ;read first char from next field
+        jp c,xchimc4            ;eof -> finished
+        jr z,xchims1            ;lf -> next
+        cp "X"                  ;column
+        ld hl,xchimsc+0
+        ld de,fldmaxx+1
+        jr z,xchims6
+        cp "Y"                  ;row
+        inc hl
+        ld de,fldmaxy+1
+        jr z,xchims6
+        cp "E"                  ;formula
+        ld de,-1
+        jr z,xchims5
+        cp "K"                  ;content
+        inc de
+        jr nz,xchims2           ;unknown -> skip line
+xchims5 push de
+        call xchred
+        pop de
+        jp c,xchimc4            ;eof
+        jr z,xchims1            ;lf
+        push de
+        ld hl,xchdat
+        call xchsuc             ;unescape ";"
+        pop de
+        add hl,de
+        ld a,c
+        sub e
+        ld c,a
+        ex de,hl
+        ld hl,(xchimsc)
+        call xchimc5            ;hl=clm/row, bc=length, de=source -> save cell
+        ;jr c,...memful
+        jr xchims3
+xchims6 push de
+        push hl
+        call xchred
+        pop hl
+        pop de
+        jp c,xchimc4
+        jr z,xchims1
+        push hl
+        ld iy,xchdat
+        ld bc,1
+        ld hl,barsdit
+        call cnvs16
+        ld a,l
+        pop hl
+        jr c,xchims2            ;wrong row/column -> skip line
+        dec a
+        ld (hl),a
+        jr xchims3
+
+;### XCHRED -> read next field from file
+;### Input      (xchred1+1)=text delimiter 1, (xchred2+1)=text delimiter 2, (xchred3+1)=field delimiter
+;### Output     CF=1 -> EOF, ZF=1 -> next line, ZF=CF=0 -> xchdat=field, C=length (with 0term)
+xchred  ld a,2              ;next status, 0=eof, 1=line feed
+        cp 1
+        ld a,2
+        ld (xchred+1),a
+        ret c
+        ret z
+        xor a
+        ld (xchdln),a
+        ld (xchdat),a
+        call xchlfd         ;check for linefeed
+        ret c
+        ret z
+xchred1 cp 0
+        jr z,xchred4        ;limiter1 -> will end with text delimiter1
+xchred2 cp 0
+        jr z,xchred4        ;limiter2 -> will end with text delimiter2
+        push af
+xchred3 ld a,0              ;no limiter -> will end with field delimiter
+        ld (xchred7+1),a
+        pop af
+        jr xchred7
+xchred4 ld (xchred7+1),a
+xchred5 call xchchr             ;** next char
+xchred6 ld d,0
+        jr c,xchreda        ;eof ->  finish field, set eof as next status
+xchred7 cp 0                ;a=first/next char
+        jr z,xchred8        ;end delimiter reached
+        call xchlfd0
+        jr c,xchred6        ;linefeed+eof
+        ld d,1
+        jr z,xchreda        ;linefeed -> finish field, set linefeed as next status
+        ld e,a
+        ld hl,xchdln
+        ld a,(hl)
+        cp 250
+        jr z,xchred5        ;field too long, skip char
+        inc (hl)
+        ld c,a:ld b,0
+        ld hl,xchdat
+        add hl,bc
+        ld (hl),e           ;add char to field
+        inc hl
+        ld (hl),0
+        jr xchred5          ;get next
+xchred8 ld hl,xchred3+1         ;** end delimiter reached
+        cp (hl)
+        ld d,2
+        jr z,xchreda
+xchred9 call xchlfd         ;was text delimiter -> check for field delimiter or linefeed
+        ld d,0
+        jr c,xchreda        ;-> eof
+        ld d,1
+        jr z,xchreda        ;-> linefeed
+        ld hl,xchred3+1
+        cp (hl)
+        jr nz,xchred9
+        ld d,2              ;-> field delimiter
+xchreda ld a,d                  ;** finish field
+        ld (xchred+1),a
+        ld a,(xchdln)
+        ld c,a
+        inc c
+        ret
+
+;### XCHLFD -> (get char and) check for linefeed
+;### Output     A=char, CF=1 -> EOF, ZF=1 -> linefeed
+xchlfd  call xchchr
+        ret c
+xchlfd0 cp 13
+        jr z,xchlfd
+        cp 10
+        scf:ccf
+        ret
+
+;### XCHCHR -> read char from file
+;### Output     CF=0 -> A=char, CF=1 -> EOF
+xchchr  ld hl,(xchbfl)
+        ld a,l:or h
+        jr z,xchchr2
+        dec hl
+        ld (xchbfl),hl
+        ld hl,(xchbps)
+xchchr1 xor a:inc a
+        ld a,(hl)
+        inc hl
+        ld (xchbps),hl
+        or a
+        scf
+        ret z
+        cp 26
+        scf
+        ret z
+        or a
+        ret
+xchchr2 ld hl,xchbuf
+        ld bc,xchbmx
+        ld a,(xchhnd)
+        ld de,(App_BnkNum)
+        call SyFile_FILINP
+        ;jr c,...error
+        ld a,c:or b
+        scf
+        ret z
+        dec bc
+        ld (xchbfl),bc
+        ld hl,xchbuf
+        jr xchchr1
 
 ;### XCHEXS -> exports SYLK
-xchexs  ;...
-        call wincls
-        jp guiret0
+xchexsh db "ID;PSYMCALC",13,10:xchexsh0
 
-;### XCHIMS -> imports SYLK
-xchims  ;...
-        call wincls
-        jp guiret0
+xchexs  ld iyh,64
+        call xchbrw3            ;zf=1 -> txtcsvfli=path
+        jp nz,guiret0
+        call xchexc0
+        jp c,xcherr0
+        ld a,c:ld (xchexs7+1),a
+        ld a,b:ld (xchexs8+1),a
+
+        ld hl,xchexsh               ;write header
+        ld bc,xchexsh0-xchexsh
+        ld a,(xchhnd)
+        ld de,(App_BnkNum)
+        call SyFile_FILOUT
+        ld a,1
+        jp c,xcherr
+
+        ld hl,0                     ;HL=first column/row
+xchexs1 push hl
+        ld a,"C"                    ;start cell record
+        ld (xchdat),a
+        ld de,xchdat+1
+        ld b,1
+        ld c,"X":call xchsfl        ;write x coordinate
+        call xchsnm
+        pop hl:push hl
+        ld c,"Y":call xchsfl        ;write y coordinate
+        ld l,h
+        call xchsnm
+        ld c,"K":call xchsfl        ;start value
+        pop hl:push hl
+
+        push bc
+        push de
+        ld e,0
+        call ibkcll:dw celget_      ;L,H=cell, E=type (+1=as displayed, +2=formula) -> (celcnvtxt)=text, BC=length (without 0term), HL=celcnvtxt, A=type
+        pop de
+        or a
+        jr z,xchexs5
+        ld (xchexs3+1),a
+        cp celtyptxt
+        jr nz,xchexs2
+        ld a,34                     ;text -> add first quote
+        ld (de),a:inc de
+xchexs2 push bc
+        push de
+        call ibkget                 ;get cell content
+        pop hl
+        pop bc
+        call xchsec                 ;escape ";"
+        add hl,bc
+        ex de,hl
+        pop af
+        add c
+        ld b,a
+xchexs3 ld a,0
+        cp celtyptxt
+        jr nz,xchexs4
+        ld a,34                     ;text -> add last quote
+        ld (de),a
+        inc de
+        inc b:inc b
+xchexs4 cp celtypfrn
+        jr nz,xchexs6
+        xor a
+        ld (xchexs3+1),a
+        pop hl:push hl
+        ld c,"E":call xchsfl        ;add formula
+        push bc
+        push de
+        ld e,2
+        call ibkcll:dw celget_      ;L,H=cell, E=type (+1=as displayed, +2=formula) -> (celcnvtxt)=text, BC=length (without 0term), HL=celcnvtxt, A=type
+        pop de
+        inc hl
+        dec c
+        jr xchexs2
+
+xchexs5 pop bc
+        jr xchexs7
+xchexs6 ex de,hl
+        ld (hl),13:inc hl
+        ld (hl),10
+        inc b:inc b
+        ld c,b
+        call xchwrt
+xchexs7 ld a,0
+        pop hl
+        inc l
+        cp l
+        jp nc,xchexs1
+        ld l,0
+        inc h
+xchexs8 ld a,0
+        cp h
+        jp nc,xchexs1
+        ld a,"E"       :ld (xchdat+0),a
+        ld hl,10*256+13:ld (xchdat+1),hl
+        ld c,3
+        call xchwrt
+        jp xchexca
+
+;### XCHSFL -> starts new field in sylk record
+;### Input      C=letter, B=length, DE=pointer
+;### Output     B,DE updated
+xchsfl  ld a,";"
+        call xchsfl1
+        ld a,c
+xchsfl1 ld (de),a
+        inc de
+        inc b
+        ret
+
+;### XCHSNM -> adds decimal number to sylk record
+;### Input      L=number-1, B=length, DE=pointer
+;### Output     B,DE updated
+xchsnm  ld a,l
+        inc a
+        ex de,hl
+        call cnv08s
+        ex de,hl
+        ret
+
+;### XCHSEC -> escape sylk text (replaces ";" with ";;")
+;### Input      HL=string, BC=length
+;### Output     BC=new length
+;### Destroyed  AF,DE,IXL
+xchsec  inc c:dec c
+        ret z
+        push hl
+        ld a,";"
+        ld b,c
+        ld e,l:ld d,h
+xchsec1 cp (hl)
+        jr nz,xchsec2
+        inc de
+xchsec2 inc hl
+        inc de
+        djnz xchsec1
+        dec hl          ;hl=last char
+        dec de          ;de=last char in escaped string
+        ld ixl,c
+        lddr
+        ex de,hl
+        inc hl          ;hl=first char destination
+        inc de          ;de=first char source
+        ld c,-1
+        ld b,ixl
+xchsec3 ld a,(hl)
+        ldi
+        cp ";"
+        jr nz,xchsec4
+        ld (de),a
+        inc de
+xchsec4 djnz xchsec3
+        ld c,ixl
+        pop hl
+        ret
+
+;### XCHSUC -> unescape sylk text (replaces ";;" with ";")
+;### Input      HL=string, BC=length
+;### Output     BC=new length
+;### Destroyed  AF,DE,IXL
+xchsuc  inc c:dec c
+        ret z
+        push hl
+        ld e,l:ld d,h
+        ld ixl,c
+xchsuc1 ld a,(hl)
+        ldi
+        jp po,xchsuc2
+        cp ";"
+        jr nz,xchsuc1
+        cp (hl)
+        jr nz,xchsuc1
+        inc hl
+        dec ixl
+        jr xchsuc1
+xchsuc2 pop hl
+        ld c,ixl
+        ret
 
 
 ;==============================================================================
@@ -2707,164 +3408,6 @@ prgfil4 ld (datfil),de
         ld hl,datnam        ;replace application filename with extended filename
         ld bc,datnam0-datnam
         ldir
-        ret
-
-;### STRLEN -> get string length
-;### Input      HL=String (0-terminated)
-;### Output     HL=Stringend (0), BC=length (max 255, without 0-terminator)
-;### Destroyed  -
-strlen  push af
-        xor a
-        ld bc,255
-        cpir
-        ld a,254
-        sub c
-        ld c,a
-        dec hl
-        pop af
-        ret
-
-;### STRINI -> inits string input control
-;### Input      IX=control
-;### Destroyed  BC,HL
-strini  ld l,(ix+0)
-        ld h,(ix+1)
-        call strlen
-strini1 ld (ix+8),c
-        ld (ix+4),c
-        ld (ix+2),b
-        ld (ix+6),b
-        ret
-
-;### CHRTRM -> check for terminator
-;### Input      (IY+0)=char, HL+1=terminator list, (HL)=list count
-;### Output     A=char, CF=0 -> is terminator, (HL)=terminator in list
-;### Destroyed  F,B,HL
-chrtrm  ld a,(iy+0)
-chrtrm0 ld b,(hl)
-chrtrm1 inc hl
-        cp (hl)
-        ret z
-        djnz chrtrm1
-        scf
-        ret
-
-;### CNV08S -> converts 8bit to decimal string
-;### Input      A=number, HL=destination string, B=counter
-;### Output     HL=next string position, B+=length
-;### Destroyed  AF,DE
-cnv08s  ld de,255
-        cp 100
-        jr c,cnv08s2
-        ld d,"2"
-        sub 200
-        jr nc,cnv08s1
-        add 100
-        dec d
-cnv08s1 ld (hl),d
-        inc hl
-        inc b
-cnv08s2 sub 10
-        inc e
-        jr nc,cnv08s2
-        jr nz,cnv08s3
-        inc d:dec d
-        jr z,cnv08s4
-cnv08s3 set 4,e
-        set 5,e
-        ld (hl),e
-        inc hl
-        inc b
-cnv08s4 add "0"+10
-        ld (hl),a
-        inc hl
-        inc b
-        ret
-
-;### CNV32S -> Converts 32Bit-number (unsigned) to string (terminated by 0)
-;### Input      DE,IX=value, IY=destination address
-;### Output     IY=Address of last char
-;### Destroyed  AF,BC,DE,HL,IX
-cnv32st dw 1,0,     10,0,     100,0,     1000,0,     10000,0
-        dw #86a0,1, #4240,#f, #9680,#98, #e100,#5f5, #ca00,#3b9a
-cnv32sz ds 4
-
-cnv32s  ld (cnv32sz),ix
-        ld (cnv32sz+2),de
-        ld ix,cnv32st+36
-        ld b,9
-        ld c,0
-cnv32s1 ld a,"0"
-        or a
-cnv32s2 ld e,(ix+0):ld d,(ix+1):ld hl,(cnv32sz):  sbc hl,de:ld (cnv32sz),hl
-        ld e,(ix+2):ld d,(ix+3):ld hl,(cnv32sz+2):sbc hl,de:ld (cnv32sz+2),hl
-        jr c,cnv32s5
-        inc c
-        inc a
-        jr cnv32s2
-cnv32s5 ld e,(ix+0):ld d,(ix+1):ld hl,(cnv32sz):  add hl,de:ld (cnv32sz),hl
-        ld e,(ix+2):ld d,(ix+3):ld hl,(cnv32sz+2):adc hl,de:ld (cnv32sz+2),hl
-        ld de,-4
-        add ix,de
-        inc c
-        dec c
-        jr z,cnv32s3
-        ld (iy+0),a
-        inc iy
-cnv32s3 djnz cnv32s1
-        ld a,(cnv32sz)
-        add "0"
-        ld (iy+0),a
-        ld (iy+1),0
-        ret
-
-;### CNVS16 -> converts string into number
-;### Input      IY=string, HL=terminator list, BC=min (>=0), DE=max (<=65534)
-;### Output     IY=string behind terminator, HL=number (>=min, <=max), CF=1 -> invalid
-;### Destroyed  AF,DE
-cnvs16  ld (cnvs166+1),hl
-        ld hl,0
-cnvs161 ld a,(iy+0)
-        inc iy
-        push bc
-        push hl
-cnvs166 ld hl,0
-        call chrtrm0
-        pop hl
-        pop bc
-        jr nc,cnvs163
-        sub "0"
-        cp 10
-        ccf
-        ret c
-        push bc
-        add hl,hl:jr c,cnvs162
-        ld c,l
-        ld b,h
-        add hl,hl:jr c,cnvs162
-        add hl,hl:jr c,cnvs162
-        add hl,bc:jr c,cnvs162
-        ld c,a
-        ld b,0
-        add hl,bc:ret c
-        pop bc
-        jr cnvs161
-cnvs162 pop bc
-cnvs165 ex de,hl
-        or a
-        ret
-cnvs163 sbc hl,bc
-        jr c,cnvs164
-        add hl,bc
-        inc de
-        sbc hl,de
-        jr nc,cnvs165
-        add hl,de
-        or a
-        ret
-cnvs164 ld l,c
-        ld h,b
-        or a
         ret
 
 ;### LSTPUT -> select list entry by value
@@ -2948,8 +3491,16 @@ fldmos5 inc ix          ;3
         jr fldmos2      ;3 22
 
 
+;==============================================================================
+;### MODULES ##################################################################
+;==============================================================================
+
+read"App-SymCalc-Subs.asm"
+
+
 hshbkt  db 0,0,0        ;2048*6 -> hash buckets   1W clm/row, 1W record address (0=empty), 1W pointer to next bucket entry
 ;*** LAST IN CODE AREA!***
+
 
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ;### DATA AREA ################################################################
@@ -3050,6 +3601,7 @@ prgtxtok    db "Ok",0
 prgtxtcnc   db "Cancel",0
 prgtxtdef   db "Default",0
 prgtxtbrw   db "Browse...",0
+prgtxtnul   db 0
 
 
 ;==============================================================================
@@ -3133,6 +3685,7 @@ txtcfdbgr   db "Background:",0
 txtprptit   db "Document properties",0
 txtprpsum   db "Summary",0
 txtprpfmt   db "Units & Formats",0
+txtprpcol   db "Colours",0
 txtprpsta   db "Statistics",0
 
 ;*** summary ******************************************************************
@@ -3215,6 +3768,39 @@ txtprpse1   db "External Sheets",0
 txtprpse2   ds 8
 txtprpsf1   db "Total memory",0
 txtprpsf2   ds 8
+
+;### PREFERENCES DIALOGUE #####################################################
+
+txtcfgtit   db "Preferences",0
+txtcfgfrm   db "Formatting",0
+txtcfgcol   db "Colours & Sizes",0
+txtprpdst   db "Decimal separator",0
+txtcfgdgt   db "Digit grouping",0
+txtcfgbgt   db "Bin/Hex group.",0
+txtcfgrgf   db "Regional settings",0
+txtcfgrgt   db "Regional presets",0
+
+txtcfgrgl0  db "[please select...]",0
+txtcfgrgl1  db "Continental Europe, Iceland",0
+txtcfgrgl2  db "USA, United Kingdom, Australia",0
+txtcfgrgl3  db "Japan, China, India, Pakistan",0
+txtcfgrgl4  db "South America, Africa (mostly)",0
+txtcfgrgl5  db "Switzerland",0
+
+txtcfgfmf   db "Default cell formatting",0
+txtcfgdpt   db "Decimal places",0
+txtcfgdbt   db "Binary digits",0
+txtcfgdxt   db "Hexadecimal digits",0
+txtcfggrt   db "Grouping",0
+txtcfgprt   db "Prefix",0
+
+txtcfgcof   db "Colour settings",0
+txtcfgctt   db "Cell text",0
+txtcfgcbt   db "Cell background",0
+txtcfgcgt   db "Grid lines",0
+txtcfgszf   db "Default cell size",0
+txtcfgswt   db "Width",0
+txtcfgsht   db "Height",0
 
 ;*** EXCHANGE (IMPORT/EXPORT) FILEFORMATS *************************************
 
@@ -3302,13 +3888,13 @@ errmemtxtd2 db "Can't recalculate cell(s).",0
 
 ;*** PULL DOWN / CONTEXT MENUS ************************************************
 
-ctxclmtxt1  db "Column width",0
+ctxclmtxt1  db "Column width...",0
 ctxclmtxt2  db "Mark this column",0
 ctxclmtxt3  db "Mark column range",0
 ctxclmtxt4  db "Insert column",0
 ctxclmtxt5  db "Remove column",0
 
-ctxrowtxt1  db "Row height",0
+ctxrowtxt1  db "Row height...",0
 ctxrowtxt2  db "Mark this row",0
 ctxrowtxt3  db "Mark row range",0
 ctxrowtxt4  db "Insert row",0
@@ -3338,6 +3924,14 @@ ctxceltxt7  db "Format cell(s)...",0
 
 App_BegTrns
 
+prgicn16c db 12,24,24:dw $+7:dw $+4,12*24:db 5
+db #11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#1d,#1d,#1d,#11,#11,#11,#11,#11,#11,#11,#d1,#d1,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#1d,#dd,#dd,#dd,#dd,#dd,#dd,#dd,#dd,#dd,#dd,#d1
+db #1d,#d1,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#1d,#df,#1f,#11,#ff,#11,#11,#1f,#f1,#11,#11,#11,#1d,#d1,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#1d,#d1,#11,#11,#1f,#11,#11,#11,#f1,#11,#11,#11
+db #1d,#d1,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#1d,#d1,#18,#11,#88,#18,#18,#18,#81,#11,#88,#11,#1d,#d1,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#1d,#d3,#33,#33,#33,#33,#33,#33,#33,#33,#33,#11
+db #1d,#d1,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#1d,#d1,#88,#11,#61,#61,#16,#16,#61,#11,#66,#11,#1d,#d1,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#1d,#d1,#88,#11,#61,#61,#17,#77,#71,#11,#16,#11
+db #1d,#d1,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#1d,#d8,#88,#11,#61,#61,#16,#16,#71,#11,#11,#11,#1d,#d1,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#1d,#d8,#88,#11,#61,#61,#16,#16,#71,#11,#11,#11
+db #1d,#d1,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#1d,#d1,#1a,#1a,#11,#11,#11,#11,#11,#1a,#1a,#a1,#1d,#d1,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11,#11
+
 ;### PRGPRZS -> Stack for application process
         ds 64
 prgstk2a dw 0
@@ -3349,18 +3943,6 @@ App_PrcID  db 0
 App_MsgBuf ds 14
 
 ;### ALERT WINDOWS ############################################################
-
-prgtxtinf   dw prgtxtinf1,4*1+2,prgtxtinf2,4*1+2,prgtxtinf3,4*1+2,prgicnbig
-
-prgtxtsav   dw prgtxtsav1,4*1+2,prgtxtinf0,4*1+2,prgtxtinf0,4*1+2
-
-;error - load/save
-prgerrinfa  dw prgerrtxt1a,4*1+2,prgerrtxt2a,4*1+2,prgerrtxt3a,4*1+2
-prgerrinfb  dw prgerrtxt1a,4*1+2,prgerrtxt2b,4*1+2,prgerrtxt3b,4*1+2
-prgerrinfc  dw prgerrtxt1a,4*1+2,prgerrtxt2c,4*1+2,prgerrtxt3c,4*1+2
-prgerrinfd  dw prgerrtxt1a,4*1+2,prgerrtxt2d,4*1+2,prgerrtxt3d,4*1+2
-prgerrinfe  dw prgerrtxt1a,4*1+2,prgerrtxt2e,4*1+2,prgerrtxt3e,4*1+2
-
 
 prgerrinf
 errforinf0  equ 00: dw errfortxta,4*1+2,errfortxt0,4*1+2,prgtxtinf0,4*1+2       ;formula
@@ -3377,6 +3959,22 @@ errmeminfa  equ 10: dw errmemtxta1,4*1+2,errmemtxta2,4*1+2,prgtxtinf0,4*1+2     
 errmeminfb  equ 11: dw errmemtxta1,4*1+2,errmemtxtb2,4*1+2,prgtxtinf0,4*1+2
 errmeminfc  equ 12: dw errmemtxta1,4*1+2,errmemtxtc2,4*1+2,prgtxtinf0,4*1+2
 errmeminfd  equ 13: dw errmemtxta1,4*1+2,errmemtxtd2,4*1+2,prgtxtinf0,4*1+2
+
+;error - load/save
+prgerrinfa  equ 14: dw prgerrtxt1a,4*1+2,prgerrtxt2a,4*1+2,prgerrtxt3a,4*1+2
+prgerrinfb  equ 15: dw prgerrtxt1a,4*1+2,prgerrtxt2b,4*1+2,prgerrtxt3b,4*1+2
+prgerrinfc  equ 16: dw prgerrtxt1a,4*1+2,prgerrtxt2c,4*1+2,prgerrtxt3c,4*1+2
+prgerrinfd  equ 17: dw prgerrtxt1a,4*1+2,prgerrtxt2d,4*1+2,prgerrtxt3d,4*1+2
+prgerrinfe  equ 18: dw prgerrtxt1a,4*1+2,prgerrtxt2e,4*1+2,prgerrtxt3e,4*1+2
+
+                    dw prgerrtxt1b,4*1+2,prgerrtxt2a,4*1+2,prgerrtxt3a,4*1+2
+                    dw prgerrtxt1b,4*1+2,prgerrtxt2b,4*1+2,prgerrtxt3b,4*1+2
+                    dw prgerrtxt1b,4*1+2,prgerrtxt2c,4*1+2,prgerrtxt3c,4*1+2
+                    dw prgerrtxt1b,4*1+2,prgerrtxt2d,4*1+2,prgerrtxt3d,4*1+2
+                    dw prgerrtxt1b,4*1+2,prgerrtxt2e,4*1+2,prgerrtxt3e,4*1+2
+
+prgmsgsav   equ 24: dw prgtxtsav1,4*1+2,prgtxtinf0,4*1+2,prgtxtinf0,4*1+2
+prgmsginf   equ 25: dw prgtxtinf1,4*1+2,prgtxtinf2,4*1+2,prgtxtinf3,4*1+2,0,prgicnbig,prgicn16c
 
 
 ;==============================================================================
@@ -3433,7 +4031,7 @@ dw 1,ctxceltxt5d, cmncmr, 0
 ;==============================================================================
 
 wincoldat   dw #0001,4+8+16, 0,0, 63, 77,0,0,  63,  77,63,77,63,77,  0,0,0,0,wincolgrp,0,0:ds 136+14
-wincolgrp   db 20,0:dw wincolrec,0,0,00*256+00,0,0,00
+wincolgrp   db 21,0:dw wincolrec,0,0,21*256+00,0,0,00
 wincolrec
 dw       0,255*256+00,000+2    ,  00, 00,10000,10000,0   ;00=Background
 
@@ -3459,6 +4057,8 @@ dw _fmtc12 ,255*256+02,256*120+128+64+12, 03,62,12,12,0  ;16=col 12
 dw _fmtc13 ,255*256+02,256*120+128+64+13, 18,62,12,12,0  ;17=col 13
 dw _fmtc14 ,255*256+02,256*120+128+64+14, 33,62,12,12,0  ;18=col 14
 dw _fmtc15 ,255*256+02,256*120+128+64+15, 48,62,12,12,0  ;19=col 15
+
+dw _fmtces ,255*256+19,0                , -2,-2, 1, 1,0  ;20=escape
 
 ctrcoltab   db 2,2+4+48+64
 ctrcoltab0  db 0:dw txtcolpen:db -1:dw txtcolpap:db -1
@@ -3726,8 +4326,8 @@ txtbotsh4   db "Sheet4",0
 winprpdat   dw #1401,4+16,50,2,200,162,0,0,200,162,200,162,200,162,prgicnsml,txtprptit,0,0,winprpgrp,0,0:ds 136+14
 winprpgrp   db winprpreca_cnt,0:dw winprpreca,0,0,05*256+04,0,0,00
 
-ctrprptab   db 3,2+4+48+64
-ctrprptab0  db 0:dw txtprpsum:db -1:dw txtprpfmt:db -1:dw txtprpsta:db -1
+ctrprptab   db 4,2+4+48+64
+ctrprptab0  db 0:dw txtprpsum:db -1:dw txtprpfmt:db -1:dw txtprpcol:db -1:dw txtprpsta:db -1
 
 ;*** summary ******************************************************************
 
@@ -3829,10 +4429,32 @@ flgprpfix   db 0
 corprpfix   db -1,-1,-1,-1
 ctrprphlp   dw txtprphlp,0,0,0,0,txtprphlp0-txtprphlp,256*18+2+4, 0,0,0,-1,14,-8,0,ctrprphlp,0,0,0,0,2,0,0,0,0:ds 14*2
 
+;*** colours ******************************************************************
+
+winprprecc_cnt  equ 13
+winprprecc
+dw       0,255*256+00,000+2    ,  00, 00,10000,10000,0  ;00=Background
+dw _prptab,255*256+20,ctrprptab,  00, 02, 200,11,0      ;01=Tabs
+dw       0,255*256+00,128+1    ,  00,143,10000,1,0      ;02=bottom line
+dw _prpoky,255*256+16,prgtxtok,   96,147,  48,12,0      ;03="Ok"     -Button
+dw _wincnc,255*256+16,prgtxtcnc, 147,147,  48,12,0      ;04="Cancel" -Button
+
+dw       0,255*256+ 3,ctrcfgcof,   2, 18, 196,75,0      ;05=Frame  Colours
+dw       0,255*256+25,ctrcfdcog, 109, 24,  63,63,0      ;06=Select Colour
+winprprecc_col equ 7
+winprprecc1
+dw       0,255*256+02,256*102+128,110,25,  16,16,0      ;07=unselect
+dw       0,255*256+02,256*17 +128,110,25,  16,16,0      ;08=selected
+dw _prpcol,255*256+19,0        ,  109,24,  63,63,0      ;09=Click  Colour
+
+dw _prpctp,255*256+18,ctrcfgctt,  18, 36,  70, 8,0      ;10=Radio Pen
+dw _prpctp,255*256+18,ctrcfgcbt,  18, 52,  70, 8,0      ;11=Radio Paper
+dw _prpctp,255*256+18,ctrcfgcgt,  18, 68,  70, 8,0      ;12=Radio Text
+
 ;*** statistics ***************************************************************
 
-winprprecc_cnt  equ 29
-winprprecc
+winprprecd_cnt  equ 29
+winprprecd
 dw       0,255*256+00,000+2    ,  00, 00,10000,10000,0  ;00=Background
 dw _prptab,255*256+20,ctrprptab,  00, 02, 200,11,0      ;01=Tabs
 dw       0,255*256+00,128+1    ,  00,143,10000,1,0      ;02=bottom line
@@ -3929,8 +4551,6 @@ dw       0,255*256+17,ctrcsvshc,  11, 65, 180, 8,0      ;12=Check    Cells as sh
 dw       0,255*256+17,ctrcsvfoc,  11, 76, 180, 8,0      ;13=Check    Save formulas
 dw       0,255*256+17,ctrcsvquc,  11, 87, 180, 8,0      ;14=Check    Quote text cells
 
-;dw       0,255*256+00,1        ,   5, 60, 190, 1,0      ;08=sep
-
 ctrcsvfll   dw txtcsvfll,2+4
 ctrcsvfli   dw txtcsvfli,0,0,0,0,255,0
 
@@ -3954,6 +4574,143 @@ ctrcsvquc   dw flgcsvquc,txtcsvquc,2+4
 flgcsvshc   db 0
 flgcsvfoc   db 0
 flgcsvquc   db 0
+
+
+;==============================================================================
+;### PREFERENCES DIALOGUE #####################################################
+;==============================================================================
+
+wincfgdat   dw #1401,4+16,50,2,200,162,0,0,200,162,200,162,200,162,prgicnsml,txtcfgtit,0,0,wincfggrp,0,0:ds 136+14
+wincfggrp   db wincfgreca_cnt,0:dw wincfgreca,0,0,05*256+04,0,0,00
+
+ctrcfgtab   db 2,2+4+48+64
+ctrcfgtab0  db 0:dw txtcfgfrm:db -1:dw txtcfgcol:db -1
+
+;*** formats ******************************************************************
+
+wincfgreca_cnt  equ 28
+wincfgreca
+dw       0,255*256+00,000+2    ,  00, 00,10000,10000,0  ;00=Background
+dw _cfgtab,255*256+20,ctrcfgtab,  00, 02, 200,11,0      ;01=Tabs
+dw       0,255*256+00,128+1    ,  00,143,10000,1,0      ;02=bottom line
+dw _cfgoky,255*256+16,prgtxtok,   96,147,  48,12,0      ;03="Ok"     -Button
+dw _wincnc,255*256+16,prgtxtcnc, 147,147,  48,12,0      ;04="Cancel" -Button
+
+dw       0,255*256+ 3,ctrcfgrgf,   2, 18, 196,61,0      ;05=Frame Regional
+
+dw       0,255*256+ 1,ctrcfgdst,  11, 32,  73, 8,0      ;06=Text  Decimal Separator
+dw       0,255*256+ 1,ctrcfgdgt, 110, 32,  37, 8,0      ;07=Text  Digit Grouping
+dw       0,255*256+ 1,ctrcfgbgt, 110, 46,  37, 8,0      ;08=Text  Bin/Hex Grouping
+wincfgreca_sep equ 9
+dw       0,255*256+32,ctrcfgdsi,  88, 30,  14,12,0      ;09=Input Decimal Separator
+dw       0,255*256+32,ctrcfgdgi, 175, 30,  14,12,0      ;10=Input Digit Grouping
+dw       0,255*256+32,ctrcfgbgi, 175, 44,  14,12,0      ;11=Input Bin/Hex Grouping
+
+dw       0,255*256+ 1,ctrcfgrgt,  11, 50,  90, 8,0      ;12=Text  Presets
+dw _cfgreg,255*256+42,ctrcfgrgl,  11, 60, 178, 8,0      ;13=List  Presets
+
+dw       0,255*256+ 3,ctrcfgfmf,   2, 80, 196,62,0      ;14=Frame Formatting
+dw       0,255*256+ 1,ctrcfgdpt,  11,100,  70, 8,0      ;15=Text  Decimal places
+dw       0,255*256+ 1,ctrcfgdbt,  11,112,  70, 8,0      ;16=Text  Bin digits
+dw       0,255*256+ 1,ctrcfgdxt,  11,124,  70, 8,0      ;17=Text  Hex digits
+dw       0,255*256+ 1,ctrcfggrt, 119, 90,  60, 8,0      ;18=Text  Grouping
+dw       0,255*256+ 1,ctrcfgprt, 165, 90,  60, 8,0      ;19=Text  Prefix
+
+dw       0,255*256+42,ctrcfgdpl,  90, 99,  24,10,0      ;20=List  Decimal places
+dw       0,255*256+42,ctrcfgdbl,  90,111,  24,10,0      ;21=List  Decimal places
+dw       0,255*256+42,ctrcfgdxl,  90,123,  24,10,0      ;22=List  Decimal places
+
+dw       0,255*256+17,ctrcfgngc, 134,100,   8, 8,0      ;23=Check num grouping
+dw       0,255*256+17,ctrcfgbgc, 134,112,   8, 8,0      ;24=Check bin grouping
+dw       0,255*256+17,ctrcfgxgc, 134,124,   8, 8,0      ;25=Check hex grouping
+dw       0,255*256+17,ctrcfgbpc, 174,112,   8, 8,0      ;26=Check bin prefix
+dw       0,255*256+17,ctrcfgxpc, 174,124,   8, 8,0      ;27=Check hex prefix
+
+
+ctrcfgdst   dw txtprpdst,2+4
+ctrcfgdsi   dw cfgnumcom,0,0,0,0,1,0    ;decimal separator
+ctrcfgdgt   dw txtcfgdgt,2+4
+ctrcfgdgi   dw cfgnumpoi,0,0,0,0,1,0    ;digit grouping
+ctrcfgbgt   dw txtcfgbgt,2+4
+ctrcfgbgi   dw cfgnumbin,0,0,0,0,1,0    ;bin/hex grouping
+
+ctrcfgrgf   dw txtcfgrgf,2+4
+ctrcfgrgt   dw txtcfgrgt,2+4
+
+ctrcfgrgl   dw 6,00,lstcfgrgl,0,1,rowcfgrgl,0,1
+rowcfgrgl   dw 0,1000,0,0
+lstcfgrgl
+dw 00,txtcfgrgl0, 01,txtcfgrgl1, 02,txtcfgrgl2, 03,txtcfgrgl3, 04,txtcfgrgl4, 05,txtcfgrgl5
+
+ctrcfgfmf   dw txtcfgfmf,2+4
+
+ctrcfgdpt   dw txtcfgdpt,2+4
+ctrcfgdbt   dw txtcfgdbt,2+4
+ctrcfgdxt   dw txtcfgdxt,2+4
+ctrcfggrt   dw txtcfggrt,2+4
+ctrcfgprt   dw txtcfgprt,2+4
+
+ctrcfgdpl   dw 8,00,lstcfddpl,0,1,rowcfddpl,0,1 ;\
+flgcfgngc   db 0                                ;|
+            db 0                                ;|
+ctrcfgdbl   dw 8,00,lstcfddbl,0,1,rowcfddpl,0,1 ;|
+flgcfgbgc   db 0                                ;|
+flgcfgbpc   db 0                                ;|
+ctrcfgdxl   dw 8,00,lstcfddxl,0,1,rowcfddpl,0,1 ;|
+flgcfgxgc   db 0                                ;|
+flgcfgxpc   db 0                                ;/
+
+ctrcfgngc   dw flgcfgngc,prgtxtnul,2+4
+ctrcfgbgc   dw flgcfgbgc,prgtxtnul,2+4
+ctrcfgxgc   dw flgcfgxgc,prgtxtnul,2+4
+ctrcfgbpc   dw flgcfgbpc,prgtxtnul,2+4
+ctrcfgxpc   dw flgcfgxpc,prgtxtnul,2+4
+
+;*** colours &sizes ***********************************************************
+
+wincfgrecb_cnt  equ 18
+wincfgrecb
+dw       0,255*256+00,000+2    ,  00, 00,10000,10000,0  ;00=Background
+dw _cfgtab,255*256+20,ctrcfgtab,  00, 02, 200,11,0      ;01=Tabs
+dw       0,255*256+00,128+1    ,  00,143,10000,1,0      ;02=bottom line
+dw _cfgoky,255*256+16,prgtxtok,   96,147,  48,12,0      ;03="Ok"     -Button
+dw _wincnc,255*256+16,prgtxtcnc, 147,147,  48,12,0      ;04="Cancel" -Button
+
+dw       0,255*256+ 3,ctrcfgcof,   2, 18, 196,75,0      ;05=Frame  Colours
+dw       0,255*256+25,ctrcfdcog, 109, 24,  63,63,0      ;06=Select Colour
+wincfgrecb_col equ 7
+wincfgrecb1
+dw       0,255*256+02,256*102+128,110,25,  16,16,0      ;07=unselect
+dw       0,255*256+02,256*17 +128,110,25,  16,16,0      ;08=selected
+dw _cfgcol,255*256+19,0        ,  109,24,  63,63,0      ;09=Click  Colour
+
+dw _cfgctp,255*256+18,ctrcfgctt,  18, 36,  70, 8,0      ;10=Radio Pen
+dw _cfgctp,255*256+18,ctrcfgcbt,  18, 52,  70, 8,0      ;11=Radio Paper
+dw _cfgctp,255*256+18,ctrcfgcgt,  18, 68,  70, 8,0      ;12=Radio Text
+
+dw       0,255*256+ 3,ctrcfgszf,   2, 94, 196,48,0      ;13=Frame  Sizes
+dw       0,255*256+ 1,ctrcfgswt,  11,109,  28, 8,0      ;14=Label Width
+dw       0,255*256+32,ctrcfgswi,  40,107,  28,12,0      ;15=Input Width
+dw       0,255*256+ 1,ctrcfgsht,  11,123,  28, 8,0      ;16=Label Height
+dw       0,255*256+32,ctrcfgshi,  40,121,  28,12,0      ;17=Input Height
+
+
+ctrcfgszf   dw txtcfgszf,2+4
+ctrcfgswt   dw txtcfgswt,2+4
+ctrcfgsht   dw txtcfgsht,2+4
+
+ctrcfgswi   dw txtcfgswi,0,0,0,0,3,0    ;width
+txtcfgswi   ds 4
+ctrcfgshi   dw txtcfgshi,0,0,0,0,3,0    ;height
+txtcfgshi   ds 4
+
+ctrcfgcof   dw txtcfgcof,2+4
+ctrcfgctt   dw flgcfgcor,txtcfgctt,256*0+2+4,bufcfgcor
+ctrcfgcbt   dw flgcfgcor,txtcfgcbt,256*1+2+4,bufcfgcor
+ctrcfgcgt   dw flgcfgcor,txtcfgcgt,256*2+2+4,bufcfgcor
+
+flgcfgcor   db 0
+bufcfgcor   ds 4
 
 
 ;==============================================================================

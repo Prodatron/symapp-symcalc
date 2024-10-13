@@ -55,7 +55,7 @@ prgprztab   dw prgstk2-App_BegTrns  ;stack length                       POST tab
 App_BnkNum  db 0                    ;*reserved*                         POST bank number
             db "SymCalcExt1":ds 13:db 0 ;name
             db 1                    ;flags (+1=16c icon)
-            dw App_BegData-App_BegCode ;16 colour icon offset
+            dw prgicn16c-App_BegCode ;16 colour icon offset
             ds 5                    ;*reserved*
 prgmemtab   db "SymExe10"           ;SymbOS-EXE-identifier              POST table reserved memory areas
             dw 2048*6               ;additional code memory (hash buckets)
@@ -65,7 +65,10 @@ prgmemtab   db "SymExe10"           ;SymbOS-EXE-identifier              POST tab
             db 0,4                  ;required OS version (4.0)
 
 prgicnsml   db 2,8,8:ds 2*8
-prgicnbig   db 6,24,24:ds 6*24
+prgicnbig   db 6,24,24
+            db #f0,#f0,#f0,#f0,#f0,#f0,#a0,#b0,#f0,#f0,#f0,#5a,#f0,#f0,#f0,#f0,#f0,#f0,#87,#0f,#0f,#0f,#0f,#1e,#96,#f0,#f0,#f0,#f0,#f0,#97,#f4,#fc,#f1,#f8,#f0,#96,#f0,#f0,#f0,#f0,#f0,#96,#f0,#f4,#f0,#f8,#f0
+            db #96,#f0,#f0,#f0,#f0,#f0,#96,#b0,#20,#a0,#70,#30,#96,#f0,#f0,#f0,#f0,#f0,#97,#ff,#ff,#ff,#ff,#fc,#96,#f0,#f0,#f0,#f0,#f0,#96,#30,#5a,#a5,#78,#3c,#96,#f0,#f0,#f0,#f0,#f0,#96,#30,#5a,#f7,#f8,#b4
+            db #96,#f0,#f0,#f0,#f0,#f0,#86,#30,#5a,#a5,#f8,#f0,#96,#f0,#f0,#f0,#f0,#f0,#86,#30,#5a,#a5,#f8,#f0,#96,#f0,#f0,#f0,#f0,#f0,#96,#f5,#f0,#f0,#f1,#f6,#96,#f0,#f0,#f0,#f0,#f0,#f0,#f0,#f0,#f0,#f0,#f0
 
 ;*** 256Byte aligned
 hshtab  ds 3*256        ;hash table     1B bucket length (0=no records), 1W first bucket

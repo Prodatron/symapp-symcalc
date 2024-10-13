@@ -59,7 +59,7 @@ App_BnkNum  db 0                    ;*reserved*                         POST ban
             ds 5                    ;*reserved*
 prgmemtab   db "SymExe10"           ;SymbOS-EXE-identifier              POST table reserved memory areas
             dw celrecmax*celreclen+celdatmax    ;additional code memory
-            dw celtxtmax                        ;additional data memory
+            dw celtxtmax+botlog-botlog0         ;additional data memory
             dw ctrcelmax*16                     ;additional transfer memory
             ds 26                   ;*reserved*
             db 0,4                  ;required OS version (4.0)

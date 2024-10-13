@@ -33,15 +33,22 @@ cfgapppap   db 8    ;field paper   |
 cfgappgrd   db 2    ;field grid    /
 
 ;default number formats
-cfgfmtflt   db 0,0*32+7+8   ;float
-cfgfmtdat   db 0,3*32+0     ;date
-cfgfmttim   db 0,4*32+0     ;time
-cfgfmtbin   db 0,6*32+7+8   ;binary
-cfgfmthex   db 0,7*32+7+8   ;hexadecimal
+cfgfmtflt   db   0,0*32+7+8     ;float          +7+8 configurable
+cfgfmtdat   db   0,3*32+0       ;date
+cfgfmttim   db   0,4*32+0       ;time
+cfgfmtbin   db 8*1,6*32+7+8     ;binary         +7+8,unit configurable
+cfgfmthex   db 8*2,7*32+7+8     ;hexadecimal    +7+8,unit configurable
 
 ;default cell formats
 cfgfmtnum   db 16*1+8,0
 cfgfmttxt   db 16*1+8,0
+
+            db 0
+
+;regional settings
+cfgnumcom   db ",",0  ;decimal separator
+cfgnumpoi   db ".",0  ;digit grouping
+cfgnumbin   db " ",0  ;bin/hex grouping
 
 cfgprgend
 
@@ -62,10 +69,7 @@ cfgcolgrd   db 2    ;field grid    /
 
 cfgdocbeg
 
-;comma/1000er dot setting
-cfgnumcom   db ","
-cfgnumpoi   db "."
-cfgnumbin   db " "
+ds 3
 
 ;unit - percentage
 cfguniper
@@ -85,9 +89,9 @@ db 1," ly" :ds 4
 ;units - binary/hexadecimal
 cfgunibin
 db 0       :ds 7
+db 0,"%"   :ds 6
 db 0,"#"   :ds 6
 db 0,"$"   :ds 6
-db 0,"%"   :ds 6
 db 0,"0x"  :ds 5
 db 0,"0b"  :ds 5
 db 1,"H"   :ds 6

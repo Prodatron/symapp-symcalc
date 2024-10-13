@@ -11,6 +11,9 @@
 fldmaxx equ 63
 fldmaxy equ 253
 
+date_year_min    equ 1980
+date_year_max    equ 2047
+
 
 celtypnum   equ 1   ;number
 celtypfrn   equ 2   ;formula number
