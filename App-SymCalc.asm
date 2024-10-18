@@ -6,9 +6,6 @@
 ;@                                                                            @
 ;@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-;release 1.0
-;- (extend) mark with mouse+shift
-
 ;cell texts -> 2nd bank
 ;- cellod3 -> copy from 2nd
 ;- celsav  -> copy to 2nd, compare old/new
@@ -38,6 +35,7 @@
 ;- names for cells and cell ranges (maybe additional token in front of 8-15?)
 ;- date with full 32bit, using negative values for low dates
 ;- SymChart
+;- bitmaps as cell content
 
 ;optimizing
 ;- optimize timget
@@ -1756,12 +1754,21 @@ mrkact  ld hl,(fldmrks)
         or h
         ret
 
+;### MRKMOS -> mark fields with mouse+shift
+mrkmos  call fldmos
+        push hl
+        call mrkrem
+        pop hl
+        ld (fldmrks),hl
+        ld hl,(fldcurp)
+        jr mrkall1
+
 ;### MRKALL -> marks whole field
 mrkall  call mrkrem
         ld hl,256*fldmaxy+fldmaxx
         ld (fldmrks),hl
         ld hl,0
-        ld (fldmrkp),hl
+mrkall1 ld (fldmrkp),hl
         call mrkini1
         jr mrkclm2
 
@@ -2132,17 +2139,20 @@ barmcl1 ld a,c
         ld (baradj3+1),a
         ld e,c
         call barmen_b       ;-> d=column/row
-        dec l:jp z,mrkclm4  ;barmcs
-        dec l:jp z,mrkclm0  ;barmcm
-        dec l:jp z,mrkrow4  ;barmrs
-        dec l:jp z,mrkrow0  ;barmrm
-        dec l:jp z,barscl   ;barmsc
-        dec l:jp z,barsrw   ;barmsr
-        dec l:jp z,movcsi   ;barmci
-        dec l:jp z,movcsr   ;barmcr
-        dec l:jp z,movrsi   ;barmri
-        dec l:jp z,movrsr   ;barmrr
-        jp prgprz0
+        ld bc,barmcl_jmp
+        jp jmptab
+barmcl_jmp 
+        dw prgprz0
+        dw mrkclm4  ;barmcs
+        dw mrkclm0  ;barmcm
+        dw mrkrow4  ;barmrs
+        dw mrkrow0  ;barmrm
+        dw barscl   ;barmsc
+        dw barsrw   ;barmsr
+        dw movcsi   ;barmci
+        dw movcsr   ;barmcr
+        dw movrsi   ;barmri
+        dw movrsr   ;barmrr
 
 ;### BARMRW -> context menu for row bar
 barmrw  ld d,1
@@ -2452,12 +2462,15 @@ fldclke db 0                    ;flag, if editor-click-mode
 fldclkf dw 0                    ;editor-click-mode orig curpos
 
 fldclk  ld a,(App_MsgBuf+3)
-        cp DSK_SUB_MRCLICK
+        cp DSK_SUB_MRCLICK      ;right click?
         jr z,fldclk2
-
-        ld a,(fldclkd)
+        ld a,(fldclkd)          ;mark session?
         or a
         jp nz,mrkfld
+        ld hl,jmp_keysta:rst #28
+        bit 0,e                 ;shift pressed?
+        jp nz,mrkmos
+
         call fldmos
         jp c,prgprz0
         ld a,(ctroldedt)        ;check, if editor lost focus (means, we are/go maybe in editor-click-mode)
@@ -2473,7 +2486,7 @@ fldclk  ld a,(App_MsgBuf+3)
         ld de,(fldcurp)
         ld (fldclkf),de         ;remember orig curpos
 
-fldclk9 call fldcurf            ;remove marking and set "update cursor anyway", there was a marking
+fldclk9 call fldcurf            ;remove marking and set "update cursor anyway", if there was a marking
         ld (fldcurp),hl
         ld a,1
         ld (fldclkd),a
@@ -2526,21 +2539,23 @@ fldclk4 ld (fldcurp),de
         call fldcur1
 fldclk5 ld hl,(coprngsta)
         call celmen_b
-        dec l:jp z,copcut   ;cmncut
-        dec l:jp z,copcop   ;cmncop
-        dec l:jp z,coppst   ;cmnpst
-        dec l:jp z,fldclr   ;cmnclr
-        dec l:jp z,cfdopn   ;cmnfmt
-
-        dec l:jp z,movcid   ;cmncid
-        dec l:jp z,movcir   ;cmncir
-        dec l:jp z,movrwi   ;cmnrwi
-        dec l:jp z,movcli   ;cmncmi
-        dec l:jp z,movcru   ;cmncru
-        dec l:jp z,movcrl   ;cmncrl
-        dec l:jp z,movrwr   ;cmnrwr
-        dec l:jp z,movclr   ;cmncmr
-        jp prgprz0
+        ld bc,fldclk_jmp
+        jp jmptab
+fldclk_jmp
+        dw prgprz0
+        dw copcut   ;cmncut
+        dw copcop   ;cmncop
+        dw coppst   ;cmnpst
+        dw fldclr   ;cmnclr
+        dw cfdopn   ;cmnfmt
+        dw movcid   ;cmncid
+        dw movcir   ;cmncir
+        dw movrwi   ;cmnrwi
+        dw movcli   ;cmncmi
+        dw movcru   ;cmncru
+        dw movcrl   ;cmncrl
+        dw movrwr   ;cmnrwr
+        dw movclr   ;cmncmr
 
 ;### FLDMOS -> returns clicked cell
 ;### Input      (App_MsgBuf+4/6)=mouse position
@@ -6953,6 +6968,18 @@ prgstk2a equ $+2
 ;### SUB ROUTINES #############################################################
 ;==============================================================================
 
+;### JMPTAB -> jumps to routine specified by a value and a table
+;### Input      L=value (0-x), BC=table with jump addresses
+;### Destroyed  F,C,HL
+jmptab  ld h,0
+        add hl,hl
+        add hl,bc
+        ld c,(hl)
+        inc hl
+        ld h,(hl)
+        ld l,c
+        jp (hl)
+
 ;### KEYCHK -> checks key
 ;### Input      HL=key jump table, B=number of entries, (App_MsgBuf+4)=key
 ;### Output     ZF=1 -> HL=jump address, ZF=0 -> not found
@@ -7233,8 +7260,8 @@ db #66,#11,#66,#66,#66,#66,#66,#66,#66,#66,#66,#66,#66,#66,#66,#66,#61,#66,#66,#
 
 txtbot1 db "member of SymbOS office suite",0
 txtbot2 db "the professional spreadsheet application",0
-txtbot3 db "(c) 2024 SymbiosiS",0
-txtbot4 db "Loading v1.0...",0
+txtbot3 db "(c) 20":dw ver_app_year:db " SymbiosiS",0
+txtbot4 db "Loading v",ver_app_maj+"0",".",ver_app_min+"0","...",0
 
 botlog0
 

@@ -38,7 +38,7 @@ Unlike some other spreadsheet programs you may have used, SymCalc does not requi
 <br>
 <b>WHAT'S NEW?</b><br>
 <br>
-<b>V1.0 (2024-10-13)</b><br>
+<b>V1.0 (2024-10-15)</b><br>
 <br>
 First full release.<br>
 <br>
@@ -46,7 +46,7 @@ First full release.<br>
 &rarr; command line support for opening documents on startup<br>
 &rarr; editable cell address field<br>
 &rarr; preferences dialogue for application and default settings<br>
-&rarr; final fixes and tweaks<br>
+&rarr; many final fixes and tweaks<br>
 <br>
 <b>V0.8 (2024-09-09)</b><br>
 <br>
@@ -151,11 +151,15 @@ A spreadsheet consists of a matrix of cells. Each cell may contain a text, a num
 <br>
 (check the <u 6100>Keyboard Shortcuts</u> as well)<br>
 <br>
-To navigate through a spreadsheet you can either use the mouse by clicking cells and scrollbars or use the cursor keys. The identifier of the actual cell is displayed in the upper left field above the spreadsheet. Its full content is displayed in the cell editor field on the upper right side. Both the mouse wheel can be used to scroll through the spreadsheet as well as cursor and control to skip pagewise. On advanced keyboards you can use page up/down or home/end for navigation. Another possibility is to type-in the cell address (e.g. C3) directly in the cell address field, and the cursor will jump to this one when pressing [Return].<br>
+To navigate through a spreadsheet you can either use the mouse by clicking cells and scrollbars or use the [Cursor] keys. The identifier of the actual cell is displayed in the upper left field above the spreadsheet. Its full content is displayed in the cell editor field on the upper right side. Both the mouse wheel can be used to scroll through the spreadsheet as well as [Cursor] and [Control] to skip pagewise. On advanced keyboards you can use page up/down or home/end for navigation. Another possibility is to type-in the cell address (e.g. C3) directly in the cell address field, and the cursor will jump to this one when pressing [Return].<br>
 <br>
 <b>Selecting Cell Ranges</b><br>
 <br>
-SymCalc provides many operations which can be applied to multiple cells, so you may want to select more than one cell at the same time. Navigate to the first cell, then use the cursor keys together with shift to mark the desired cell range. You can use the mouse as well, click on the first cell, keep the left mouse button down and move over the desired range to mark all cells. An additional possibility is to type-in the cell range in the cell address field and press [Return]. The first and the last cell have to be specified, separated by a colon (e.g. A1:D4).<br>
+SymCalc provides many operations which can be applied to multiple cells, so you may want to select more than one cell at the same time.<br>
+<br>
+Navigate to the first cell, then use the [Cursor] keys together with [Shift] to mark the desired cell range. You can use the mouse as well, click on the first cell, keep the left mouse button down and move over the desired range to mark all cells. A cell selection can be changed with the mouse by pressing [Shift] and clicking on another end cell.<br>
+<br>
+An additional possibility is to type-in the cell range in the cell address field and press [Return]. The first and the last cell have to be specified, separated by a colon (e.g. A1:D4).<br>
 <br>
 <b>Editing Cells</b><br>
 <br>
@@ -460,7 +464,7 @@ You want to calculate compound interest and how your money grows. To do this, en
 <br>
 Look at C4: The reference to the amount (B4) is relative, while the reference to the interest rate is absolute ($C$1). A5 (next year) and B5 (new amount) also have relative references, while C5 again contains both. Now copy the cells in row 5 and paste them into a new range from A6 to C9.<br>
 <br>
-You can do this using the keyboard by navigating to cell A5, then pressing Shift and the left arrow key twice. Now press Control+C (Copy). Next, navigate to A6, press Shift and the arrow right key twice and the arrow down key twice. Now press Control+V (Paste). Or use the mouse, highlight the range from A5 to C5, right-click and select "Copy". Now highlight the range from A6 to C8, right-click and select "Paste".<br>
+You can do this using the keyboard by navigating to cell A5, then pressing [Shift] and the left arrow key twice. Now press [Control]+C (Copy). Next, navigate to A6, press [Shift] and the arrow right key twice and the arrow down key twice. Now press [Control]+V (Paste). Or use the mouse, highlight the range from A5 to C5, right-click and select "Copy". Now highlight the range from A6 to C8, right-click and select "Paste".<br>
 <br>
 You will then get the following cell content:<br>
 <br>
@@ -616,6 +620,10 @@ Clr             <t6>clear actual/marked cells<br>
 Esc             <t6>remove marking<br>
 Ctrl+A          <t6>mark all<br>
 <br>
+Ctrl+C          <t6>copy actual or marked cells<br>
+Ctrl+X          <t6>prepare cut & paste for cells<br>
+Ctrl+V          <t6>(cut and) paste cells<br>
+<br>
 Alt+0           <t6>open <u 3710>Cell Format Dialogue</u><br>
 Ctrl+L          <t6>left alignment<br>
 Ctrl+E          <t6>centered<br>
@@ -634,10 +642,6 @@ Alt+6           <t6>boolean format<br>
 Alt+7           <t6>binary format<br>
 Alt+8           <t6>hexadecimal format<br>
 Alt+9           <t6>1000 separator on/off<br>
-<br>
-Ctrl+C          <t6>copy actual or marked cells<br>
-Ctrl+X          <t6>prepare cut & paste for cells<br>
-Ctrl+V          <t6>(cut and) paste cells<br>
 <br>
 <b>While editing a cell</b><br>
 <br>
@@ -695,6 +699,29 @@ The file selection dialogue appears, you have to select a path and a filename, a
 <br>
 <hr __________________________________________________________________________>
 <br>
+<b>>Import</b><br>
+<b>>>CSV file...</b><br>
+<br>
+Imports a CSV file into the actual sheet. Beside the file you have to select, which field delimiter is used for separating the cells (e.g. ";") and which text delimiters maybe used for quoting cell text. If [None] is selected, then everything will be handeld as cell content.<br>
+<br>
+<b>>>SYLK file...</b><br>
+<br>
+Imports a SYLK file (*.SLK) into the actual sheet. The import function is rudimentary and currently doesn't support cell formatting. Unescaping of semicolons is implemented.<br>
+<br>
+<b>>Export</b><br>
+<b>>>CSV file...</b><br>
+<br>
+Exports the actual sheet as a CSV file. You have to specify the field and text delimiters and can select several options:<br>
+&rarr; "select cell content as shown" will store the cells in the same way like displayed in the sheet; if this option isn't selected, the raw values will be saved<br>
+&rarr; "save formulas instead of calculated values" will save the formula expression, otherwise it will save the raw or formatted result (see above)<br>
+&rarr; "quote all text cells" will use text delimiters always for text cells, otherwise only in the case, that a text cell contains a field delimiter char<br>
+<br>
+<b>>>SYLK file...</b><br>
+<br>
+Exports the actual sheet as a SYLK file (*.SLK). The export function is rudimentary and currently doesn't support cell formatting. Escaping of semicolons is implemented.<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
 <b>>Properties...</b><br>
 <br>
 Opens the document properties.<br>
@@ -711,8 +738,8 @@ Opens the document properties.<br>
 <t2><b>M</b> <t4>- month<br>
 <t2><b>Y</b> <t4>- year 4 digits<br>
 <t2><b>y</b> <t4>- year 2 digits<br>
-<t2><b>W</b> <t4>- weekday long (e.g. "Friday")<br>
-<t2><b>w</b> <t4>- weekday short (e.g. "Fri")<br>
+<t2><b>W</b> <t4>- weekday name long (e.g. "Friday")<br>
+<t2><b>w</b> <t4>- weekday name short (e.g. "Fri")<br>
 <t2><b>N</b> <t4>- month name long (e.g. "August")<br>
 <t2><b>n</b> <t4>- month name short (e.g. "Aug")<br>
 <t2><b>\</b> <t4>- print next char<br>
@@ -720,7 +747,7 @@ Opens the document properties.<br>
 <t2>Example: "W, t\he D. of N" may result in<br>
 <t7>"Friday, the 31. of December"<br>
 <br>
-&rarr; under "Colors" you can set the colors of the cell contents, background and grid lines of your current table. Existing cells retain their current color settings.<br>
+&rarr; under "Colors" you can set the colors of the cell contents, background and grid lines of your current sheet. Existing cells retain their current color settings.<br>
 <br>
 &rarr; "statistics" displays information about the resources the actual document is using like memory and number of cells.<br>
 <br>

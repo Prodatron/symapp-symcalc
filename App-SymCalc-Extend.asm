@@ -3837,10 +3837,10 @@ txtcsvquc   db "Quote all text cells",0
 ;### ALERT WINDOWS ############################################################
 
 prgtxtinf1  db "SymCalc Spreadsheet",0
-prgtxtinf2  db " Version 0.8 (Build "
+prgtxtinf2  db " Version ",ver_app_maj+"0",".",ver_app_min+"0"," (Build "
 read "..\..\..\SRC-Main\build.asm"
             db "pdt)",0
-prgtxtinf3  db " Copyright <c> 2024 SymbiosiS"
+prgtxtinf3  db " Copyright <c> 20":dw ver_app_year:db " SymbiosiS"
 prgtxtinf0  db 0
 
 prgtxtsav1  db "Save changes?",0
