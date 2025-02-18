@@ -38,7 +38,7 @@ Unlike some other spreadsheet programs you may have used, SymCalc does not requi
 <br>
 <b>WHAT'S NEW?</b><br>
 <br>
-<b>V1.0 (2024-10-15)</b><br>
+<b>V1.0 (2024-10-18)</b><br>
 <br>
 First full release.<br>
 <br>
@@ -1060,6 +1060,8 @@ Some examples how a list can be defined:<br>
         <t3>datetime time<br>
 <b>DATETIME</b>(year;month;day;hour;min;sec)<br>
         <t3>full datetime<br>
+<b>NOW</b>()<br>
+        <t3>current date and time<br>
 <b>YEAR</b>(datetime)<br>
         <t3>year of a datetime (1980-2047)<br>
 <b>MONTH</b>(datetime)<br>
@@ -1090,6 +1092,8 @@ Some examples how a list can be defined:<br>
         <t3>minutes between two datetimes<br>
 <b>SECONDS</b>(datetime2;datetime1)<br>
         <t3>seconds between two datetimes<br>
+<b>TICKS</b>()<br>
+        <t3>1/50seconds system counter<br>
 <br>
 <br>
 <u 8800>Table</u><br>
@@ -1684,6 +1688,18 @@ Result:<br>
 <br>
 <hr __________________________________________________________________________>
 <br>
+<b>NOW</b>()<br>
+returns the current date and time as a datetime<br>
+<br>
+Parameters: none<br>
+<br>
+Example:<br>
+<t1>NOW()<br>
+Result:<br>
+<t1>09.11.2024 15:34:52<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
 <b>YEAR</b>(datetime)<br>
 returns the year of a date or datetime (1980-2047)<br>
 <br>
@@ -1888,6 +1904,18 @@ Example:<br>
 <t1>SECONDS(_13:57:52;_13:57:12;)<br>
 Result:<br>
 <t1>40<br>
+<br>
+<hr __________________________________________________________________________>
+<br>
+<b>TICKS</b>()<br>
+returns the current value of the system counter; this is not a datetime function, but can be used for high resolution time measurements; the system counter is incremented once per 1/50 of a second, so this value will be incremented by 50 within one second.<br>
+<br>
+Parameters: none<br>
+<br>
+Example:<br>
+<t1>TICKS()<br>
+Result:<br>
+<t1>296354<br>
 <br>
 
 

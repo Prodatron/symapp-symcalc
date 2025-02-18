@@ -8,8 +8,8 @@
 ;@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 ver_app_maj     equ 1
-ver_app_min     equ 0
-ver_app_year    equ 256*"4"+"2"
+ver_app_min     equ 1
+ver_app_year    equ 256*"5"+"2"
 
 fldmaxx         equ 63
 fldmaxy         equ 253

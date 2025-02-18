@@ -1144,8 +1144,9 @@ barmen0 ld a,(App_BnkNum)
 ;### Input      L=(coprngsta)
 celmen  ld a,l
         or a
+        ld a,16
         jr z,celmen1
-        ld a,1
+        inc a
 celmen1 ld (2*8+ctxceldat+2),a
         push de
         ld de,ctxceldat
@@ -3888,33 +3889,190 @@ errmemtxtd2 db "Can't recalculate cell(s).",0
 
 ;*** PULL DOWN / CONTEXT MENUS ************************************************
 
-ctxclmtxt1  db "Column width...",0
-ctxclmtxt2  db "Mark this column",0
-ctxclmtxt3  db "Mark column range",0
-ctxclmtxt4  db "Insert column",0
-ctxclmtxt5  db "Remove column",0
+menicn_null         db 4,8,1:dw $+7,$+4,4:db 5: db #66,#66,#66,#66
 
-ctxrowtxt1  db "Row height...",0
-ctxrowtxt2  db "Mark this row",0
-ctxrowtxt3  db "Mark row range",0
-ctxrowtxt4  db "Insert row",0
-ctxrowtxt5  db "Remove row",0
+;main
+menmaitxt1  db "File",0
+menmaitxt11 db 6,128,-1:dw menicn_filenew+1:      db " New",0
+menmaitxt12 db 6,128,-1:dw menicn_fileopen+1:     db " Open...",0
+menmaitxt13 db 6,128,-1:dw menicn_filesave+1:     db " Save",0
+menmaitxt14 db 6,128,-1:dw menicn_filesaveas+1:   db " Save as...",0
+menmaitxt15 db 6,128,-1:dw menicn_import+1:       db " Import",0
+menmaitxt151 db 6,128,-1:dw menicn_filcsv+1:       db " CSV file...",0
+menmaitxt152 db 6,128,-1:dw menicn_filsylk+1:      db " SYLK file...",0
+menmaitxt16 db 6,128,-1:dw menicn_export+1:       db " Export",0
+menmaitxt17 db 6,128,-1:dw menicn_properties+1:   db " Properties...",0
+menmaitxt10 db 6,128,-1:dw menicn_quit+1:         db " Exit",0
 
-ctxceltxt1  db "Cut",0
-ctxceltxt2  db "Copy",0
-ctxceltxt3  db "Paste",0
-ctxceltxt4  db "Insert cell(s)",0
-ctxceltxt4a   db "Move cells down",0
-ctxceltxt4b   db "Move cells right",0
-ctxceltxt4c   db "Insert whole row(s)",0
-ctxceltxt4d   db "Insert whole column(s)",0
-ctxceltxt5  db "Remove cell(s)",0
-ctxceltxt5a   db "Move cells up",0
-ctxceltxt5b   db "Move cells left",0
-ctxceltxt5c   db "Remove whole row(s)",0
-ctxceltxt5d   db "Remove whole column(s)",0
-ctxceltxt6  db "Clear cell(s)",0
-ctxceltxt7  db "Format cell(s)...",0
+menicn_filenew      db 4,8,7:dw $+7,$+4,28:db 5: db #61,#11,#11,#66, #61,#88,#81,#16, #61,#88,#88,#16, #61,#88,#88,#16, #61,#88,#88,#16, #61,#88,#88,#16, #61,#11,#11,#16
+menicn_fileopen     db 4,8,7:dw $+7,$+4,28:db 5: db #61,#16,#66,#66, #18,#81,#16,#66, #18,#88,#77,#77, #18,#87,#22,#27, #18,#72,#22,#76, #17,#22,#27,#66, #77,#77,#76,#66
+menicn_filesave     db 4,8,7:dw $+7,$+4,28:db 5: db #11,#11,#11,#11, #1f,#ee,#ee,#f1, #1f,#ee,#ee,#f1, #1f,#ff,#ff,#f1, #1f,#11,#c1,#f1, #1f,#11,#c1,#f1, #61,#11,#11,#11
+menicn_filesaveas   db 4,8,7:dw $+7,$+4,28:db 5: db #66,#11,#11,#16, #66,#18,#88,#11, #11,#11,#11,#81, #1f,#ee,#f1,#81, #1f,#ff,#f1,#81, #1f,#11,#f1,#11, #61,#11,#11,#66
+menicn_import       db 4,8,7:dw $+7,$+4,28:db 5: db #16,#77,#77,#76, #11,#78,#88,#77, #1e,#18,#88,#87, #1e,#e1,#88,#87, #1e,#18,#88,#87, #11,#78,#88,#87, #16,#77,#77,#77
+menicn_export       db 4,8,7:dw $+7,$+4,28:db 5: db #66,#71,#77,#76, #66,#11,#88,#77, #61,#e1,#88,#87, #1e,#e1,#88,#87, #61,#e1,#88,#87, #66,#11,#88,#87, #66,#71,#77,#77
+menicn_filcsv       db 4,8,7:dw $+7,$+4,28:db 5: db #66,#66,#66,#66, #66,#66,#66,#66, #6f,#61,#67,#67, #f6,#16,#67,#67, #f6,#61,#67,#67, #f6,#61,#66,#76, #6f,#16,#66,#76
+menicn_filsylk      db 4,8,7:dw $+7,$+4,28:db 5: db #66,#66,#66,#66, #66,#66,#66,#66, #77,#61,#6f,#6f, #76,#61,#6f,#6f, #67,#61,#6f,#f6, #67,#61,#6f,#6f, #77,#61,#1f,#6f
+menicn_properties   db 4,8,7:dw $+7,$+4,28:db 5: db #16,#77,#17,#77, #66,#66,#66,#66, #16,#77,#77,#17, #66,#66,#66,#66, #86,#77,#71,#77, #66,#66,#66,#66, #16,#71,#77,#77
+menicn_quit         db 4,8,7:dw $+7,$+4,28:db 5: db #11,#16,#16,#66, #14,#46,#11,#66, #14,#11,#1e,#16, #14,#1e,#ee,#e1, #14,#11,#1e,#16, #14,#46,#11,#66, #11,#16,#16,#66
+
+menmaitxt2  db "Edit",0
+menmaitxt21 db 6,128,-1:dw menicn_cut+1:          db " Cut",0
+menmaitxt22 db 6,128,-1:dw menicn_copy+1:         db " Copy",0
+menmaitxt23 db 6,128,-1:dw menicn_paste+1:        db " Paste",0
+menmaitxt24 db 6,128,-1:dw menicn_delete+1:       db " Clear cell(s)",0
+menmaitxt25 db 6,128,-1:dw menicn_selall+1:       db " Select All",0
+menmaitxt26 db 6,128,-1:dw menicn_sel+1:          db " Select",0
+menmaitxt261 db 6,128,-1:dw menicn_selcolumn+1:    db " Column",0
+menmaitxt262 db 6,128,-1:dw menicn_selrow+1:       db " Row",0
+
+menicn_cut          db 4,8,7:dw $+7,$+4,28:db 5: db #61,#a6,#a1,#66, #61,#a6,#a1,#66, #66,#16,#16,#66, #66,#61,#66,#66, #66,#71,#76,#66, #67,#a7,#a7,#66, #67,#76,#77,#66
+menicn_copy         db 4,8,7:dw $+7,$+4,28:db 5: db #55,#55,#56,#66, #58,#88,#56,#66, #58,#88,#57,#77, #58,#88,#50,#07, #55,#55,#50,#07, #66,#67,#00,#07, #66,#67,#77,#77
+menicn_paste        db 4,8,7:dw $+7,$+4,28:db 5: db #66,#33,#36,#66, #33,#22,#23,#36, #32,#22,#22,#36, #32,#55,#55,#55, #33,#58,#88,#85, #66,#58,#88,#85, #66,#55,#55,#55
+menicn_delete       db 4,8,7:dw $+7,$+4,28:db 5: db #ff,#66,#66,#ff, #6f,#f6,#6f,#f6, #66,#ff,#ff,#66, #66,#6f,#f6,#66, #66,#ff,#ff,#66, #6f,#f6,#6f,#f6, #ff,#66,#66,#ff
+menicn_selall       db 4,8,7:dw $+7,$+4,28:db 5: db #11,#11,#11,#16, #1a,#a1,#aa,#16, #1a,#a1,#aa,#16, #11,#11,#11,#16, #1a,#a1,#aa,#16, #1a,#a1,#aa,#16, #11,#11,#11,#16
+menicn_sel          equ menicn_null
+menicn_selcolumn    db 4,8,7:dw $+7,$+4,28:db 5: db #11,#11,#11,#16, #1a,#a1,#88,#16, #1a,#a1,#88,#16, #11,#11,#11,#16, #1a,#a1,#88,#16, #1a,#a1,#88,#16, #11,#11,#11,#16
+menicn_selrow       db 4,8,7:dw $+7,$+4,28:db 5: db #11,#11,#11,#16, #1a,#a1,#aa,#16, #1a,#a1,#aa,#16, #11,#11,#11,#16, #18,#81,#88,#16, #18,#81,#88,#16, #11,#11,#11,#16
+
+menmaitxt3  db "View",0
+menmaitxt31 db 6,128,-1:dw menicn_vwtool+1:       db " Tool bar",0
+menmaitxt32 db 6,128,-1:dw menicn_vwstatus+1:     db " Status bar",0
+menmaitxt33 db 6,128,-1:dw menicn_settings+1:     db " Preferences...",0
+
+menicn_vwtool       db 4,8,7:dw $+7,$+4,28:db 5: db #61,#11,#11,#16, #17,#77,#76,#71, #13,#22,#33,#31, #13,#22,#33,#31, #18,#88,#88,#81, #18,#88,#88,#81, #18,#88,#88,#81
+menicn_vwstatus     db 4,8,7:dw $+7,$+4,28:db 5: db #18,#88,#88,#81, #18,#88,#88,#81, #18,#88,#88,#81, #18,#88,#88,#81, #13,#32,#32,#31, #13,#32,#32,#31, #61,#11,#11,#16
+menicn_settings     db 4,8,7:dw $+7,$+4,28:db 5: db #66,#6c,#66,#66, #6c,#6c,#6c,#66, #6f,#cd,#cf,#66, #cc,#c1,#cc,#c6, #ff,#cc,#cf,#f6, #6c,#fc,#fc,#66, #6f,#6c,#6f,#66
+
+menmaitxt4  db "Format",0
+menmaitxt41 db 6,128,-1:dw menicn_fmstyle+1:      db " Style",0
+menmaitxt411    db 6,128,-1:dw menicn_fmnormal+1:     db " Normal",0
+menmaitxt412    db 6,128,-1:dw menicn_fmbold+1:       db " Bold",0
+menmaitxt413    db 6,128,-1:dw menicn_fmitalic+1:     db " Italic",0
+menmaitxt42 db 6,128,-1:dw menicn_fmalign+1:      db " Alignment",0
+menmaitxt421    db 6,128,-1:dw menicn_fmgeneral+1:    db " General",0
+menmaitxt422    db 6,128,-1:dw menicn_fmleft+1:       db " Left",0
+menmaitxt423    db 6,128,-1:dw menicn_fmcenter+1:     db " Centered",0
+menmaitxt424    db 6,128,-1:dw menicn_fmright+1:      db " Right",0
+menmaitxt43 db 6,128,-1:dw menicn_fmformat+1:         db " Number format",0
+menmaitxt431    db 6,128,-1:dw menicn_fmnumber+1:     db " Number",0
+menmaitxt432    db 6,128,-1:dw menicn_fmdate+1:       db " Date",0
+menmaitxt433    db 6,128,-1:dw menicn_fmtime+1:       db " Time",0
+menmaitxt434    db 6,128,-1:dw menicn_fmpercent+1:    db " Percentage",0
+menmaitxt435    db 6,128,-1:dw menicn_fmscient+1:     db " Scientific",0
+menmaitxt436    db 6,128,-1:dw menicn_fmbool+1:       db " Boolean",0
+menmaitxt437    db 6,128,-1:dw menicn_fmbin+1:        db " Binary",0
+menmaitxt438    db 6,128,-1:dw menicn_fmhex+1:        db " Hexadecimal",0
+menmaitxt439    db 6,128,-1:dw menicn_fm1000sep+1:    db " 1000 separator",0
+menmaitxt44 db 6,128,-1:dw menicn_fmcell+1:       db " Cells...",0
+menmaitxt45 db 6,128,-1:dw menicn_selcolumn+1:    db " Columns",0
+menmaitxt451    db 6,128,-1:dw menicn_sizcolumn+1:    db " Width...",0
+menmaitxt46 db 6,128,-1:dw menicn_selrow+1:       db " Rows",0
+menmaitxt461    db 6,128,-1:dw menicn_sizrow+1:       db " Height...",0
+
+menicn_fmnormal     db 4,8,7:dw $+7,$+4,28:db 5: db #11,#16,#61,#11, #61,#16,#66,#16, #61,#61,#66,#16, #61,#66,#16,#16, #61,#66,#61,#16, #61,#66,#66,#16, #11,#16,#61,#11
+menicn_fmbold       db 4,8,7:dw $+7,$+4,28:db 5: db #11,#11,#11,#16, #11,#16,#61,#11, #11,#16,#61,#11, #11,#11,#11,#16, #11,#16,#61,#11, #11,#16,#61,#11, #11,#11,#11,#16
+menicn_fmitalic     db 4,8,7:dw $+7,$+4,28:db 5: db #66,#66,#11,#11, #66,#66,#61,#16, #66,#66,#11,#66, #66,#61,#16,#66, #66,#11,#66,#66, #61,#16,#66,#66, #11,#11,#66,#66
+menicn_fmstyle      equ menicn_fmnormal
+
+menicn_fmgeneral    db 4,8,7:dw $+7,$+4,28:db 5: db #61,#11,#11,#16, #66,#66,#66,#66, #61,#11,#11,#16, #66,#66,#66,#66, #61,#11,#11,#16, #66,#66,#66,#66, #61,#11,#11,#16
+menicn_fmleft       db 4,8,7:dw $+7,$+4,28:db 5: db #11,#11,#11,#16, #66,#66,#66,#66, #11,#11,#66,#66, #66,#66,#66,#66, #11,#11,#11,#16, #66,#66,#66,#66, #11,#11,#66,#66
+menicn_fmcenter     db 4,8,7:dw $+7,$+4,28:db 5: db #61,#11,#11,#16, #66,#66,#66,#66, #66,#11,#11,#66, #66,#66,#66,#66, #61,#11,#11,#16, #66,#66,#66,#66, #66,#11,#11,#66
+menicn_fmright      db 4,8,7:dw $+7,$+4,28:db 5: db #61,#11,#11,#11, #66,#66,#66,#66, #66,#66,#11,#11, #66,#66,#66,#66, #61,#11,#11,#11, #66,#66,#66,#66, #66,#66,#11,#11
+menicn_fmalign      equ menicn_fmgeneral
+
+menicn_fmnumber     db 4,8,7:dw $+7,$+4,28:db 5: db #66,#66,#66,#66, #56,#66,#61,#16, #56,#77,#66,#61, #56,#66,#76,#11, #56,#67,#66,#61, #56,#76,#61,#16, #66,#77,#76,#66
+menicn_fmdate       db 4,8,7:dw $+7,$+4,28:db 5: db #18,#88,#88,#16, #18,#78,#88,#01, #18,#78,#78,#16, #18,#77,#78,#01, #18,#88,#78,#16, #18,#88,#88,#01, #6d,#dd,#dd,#16
+menicn_fmtime       db 4,8,7:dw $+7,$+4,28:db 5: db #66,#77,#77,#66, #67,#8e,#18,#76, #78,#88,#18,#87, #7e,#81,#88,#e7, #78,#18,#88,#87, #67,#88,#e8,#76, #66,#77,#77,#66
+menicn_fmpercent    db 4,8,7:dw $+7,$+4,28:db 5: db #11,#66,#61,#16, #11,#66,#11,#16, #66,#61,#11,#66, #66,#11,#16,#66, #61,#11,#66,#66, #11,#16,#61,#16, #11,#66,#61,#16
+menicn_fmscient     db 4,8,7:dw $+7,$+4,28:db 5: db #66,#66,#66,#66, #63,#61,#16,#76, #33,#61,#66,#77, #63,#61,#16,#77, #63,#61,#66,#67, #63,#61,#16,#66, #66,#66,#66,#66
+menicn_fmbool       db 4,8,7:dw $+7,$+4,28:db 5: db #f6,#66,#f6,#66, #ff,#6f,#f6,#69, #6f,#ff,#66,#99, #ff,#6f,#f9,#99, #f9,#96,#f9,#96, #69,#99,#99,#66, #66,#99,#96,#66
+menicn_fmbin        db 4,8,7:dw $+7,$+4,28:db 5: db #76,#77,#76,#76, #76,#76,#76,#76, #76,#77,#76,#76, #66,#66,#66,#66, #77,#76,#77,#76, #76,#76,#76,#76, #77,#76,#77,#76
+menicn_fmhex        db 4,8,7:dw $+7,$+4,28:db 5: db #66,#66,#66,#66, #66,#66,#66,#66, #61,#61,#16,#11, #16,#61,#66,#16, #16,#61,#16,#11, #16,#61,#66,#16, #61,#61,#16,#16
+menicn_fm1000sep    db 4,8,7:dw $+7,$+4,28:db 5: db #63,#66,#63,#36, #33,#66,#36,#63, #63,#66,#36,#63, #63,#66,#36,#63, #63,#66,#36,#63, #63,#66,#63,#36, #66,#61,#66,#66
+menicn_fmformat     equ menicn_fmnumber
+
+menicn_fmcell       db 4,8,7:dw $+7,$+4,28:db 5: db #11,#11,#11,#11, #18,#88,#ff,#81, #18,#8f,#8f,#81, #18,#f8,#8f,#81, #18,#ff,#ff,#81, #18,#f8,#8f,#81, #11,#11,#11,#11
+menicn_sizcolumn    db 4,8,7:dw $+7,$+4,28:db 5: db #66,#11,#11,#66, #66,#18,#81,#66, #f6,#18,#81,#6f, #ff,#11,#11,#ff, #f6,#18,#81,#6f, #66,#18,#81,#66, #66,#11,#11,#66
+menicn_sizrow       db 4,8,8:dw $+7,$+4,32:db 5: db #66,#ff,#f6,#66, #66,#6f,#66,#66, #11,#11,#11,#16, #18,#81,#88,#16, #18,#81,#88,#16, #11,#11,#11,#16, #66,#6f,#66,#66, #66,#ff,#f6,#66
+
+menmaitxt5  db "Table",0
+menmaitxt51 db 6,128,-1:dw menicn_celinsert+1:    db " Insert cell(s)",0
+menmaitxt511    db 6,128,-1:dw menicn_celdown+1:      db " Move cells down",0
+menmaitxt512    db 6,128,-1:dw menicn_celright+1:     db " Move cells right",0
+menmaitxt513    db 6,128,-1:dw menicn_rowdown+1:      db " Insert whole row(s)",0
+menmaitxt514    db 6,128,-1:dw menicn_clmright+1:     db " Insert whole column(s)",0
+menmaitxt52 db 6,128,-1:dw menicn_rowdown+1:      db " Insert row(s)",0
+menmaitxt53 db 6,128,-1:dw menicn_clmright+1:     db " Insert column(s)",0
+menmaitxt54 db 6,128,-1:dw menicn_celremove+1:    db " Remove cell(s)",0
+menmaitxt541    db 6,128,-1:dw menicn_celup+1:        db " Move cells up",0
+menmaitxt542    db 6,128,-1:dw menicn_celleft+1:      db " Move cells left",0
+menmaitxt543    db 6,128,-1:dw menicn_rowup+1:        db " Remove whole row(s)",0
+menmaitxt544    db 6,128,-1:dw menicn_clmleft+1:      db " Remove whole column(s)",0
+menmaitxt55 db 6,128,-1:dw menicn_rowup+1:        db " Remove row(s)",0
+menmaitxt56 db 6,128,-1:dw menicn_clmleft+1:      db " Remove column(s)",0
+menmaitxt57 db 6,128,-1:dw menicn_delete+1:       db " Clear cell content",0
+
+menicn_celinsert    db 4,8,7:dw $+7,$+4,28:db 5: db #11,#11,#11,#16, #18,#88,#88,#16, #18,#87,#88,#16, #18,#77,#78,#16, #18,#87,#88,#16, #18,#88,#88,#16, #11,#11,#11,#16
+menicn_celright     db 4,8,7:dw $+7,$+4,28:db 5: db #11,#11,#11,#16, #18,#71,#aa,#16, #17,#77,#aa,#16, #11,#71,#11,#16, #18,#81,#88,#16, #18,#81,#88,#16, #11,#11,#11,#16
+menicn_celdown      db 4,8,7:dw $+7,$+4,28:db 5: db #11,#11,#11,#16, #18,#71,#88,#16, #17,#77,#88,#16, #11,#71,#11,#16, #1a,#a1,#88,#16, #1a,#a1,#88,#16, #11,#11,#11,#16
+menicn_clmright     db 4,8,7:dw $+7,$+4,28:db 5: db #11,#11,#11,#16, #18,#81,#aa,#16, #18,#81,#aa,#16, #11,#71,#11,#16, #17,#77,#aa,#16, #18,#71,#aa,#16, #11,#11,#11,#16
+menicn_rowdown      db 4,8,7:dw $+7,$+4,28:db 5: db #11,#11,#11,#16, #18,#81,#78,#16, #18,#87,#77,#16, #11,#11,#71,#16, #1a,#a1,#aa,#16, #1a,#a1,#aa,#16, #11,#11,#11,#16
+
+menicn_celremove    db 4,8,7:dw $+7,$+4,28:db 5: db #11,#11,#11,#16, #18,#88,#88,#16, #18,#88,#88,#16, #18,#ff,#f8,#16, #18,#88,#88,#16, #18,#88,#88,#16, #11,#11,#11,#16
+menicn_celleft      db 4,8,7:dw $+7,$+4,28:db 5: db #11,#11,#11,#16, #18,#81,#ff,#16, #12,#21,#ff,#16, #11,#11,#11,#16, #18,#81,#88,#16, #18,#81,#88,#16, #11,#11,#11,#16
+menicn_celup        db 4,8,7:dw $+7,$+4,28:db 5: db #11,#11,#11,#16, #12,#21,#88,#16, #18,#81,#88,#16, #11,#11,#11,#16, #1f,#f1,#88,#16, #1f,#f1,#88,#16, #11,#11,#11,#16
+menicn_clmleft      db 4,8,7:dw $+7,$+4,28:db 5: db #11,#11,#11,#16, #18,#81,#ff,#16, #18,#81,#ff,#16, #11,#11,#11,#16, #12,#21,#ff,#16, #18,#81,#ff,#16, #11,#11,#11,#16
+menicn_rowup        db 4,8,7:dw $+7,$+4,28:db 5: db #11,#11,#11,#16, #18,#81,#22,#16, #18,#81,#88,#16, #11,#11,#11,#16, #1f,#f1,#ff,#16, #1f,#f1,#ff,#16, #11,#11,#11,#16
+
+;menmaitxt6  db "Data",0
+
+menmaitxt7  db "?",0
+menmaitxt71 db 6,128,-1:dw menicn_help+1:         db " Help topics",0
+menmaitxt72 db 6,128,-1:dw menicn_about+1:        db " About",0
+
+menicn_help         db 4,8,7:dw $+7,$+4,28:db 5: db #66,#1f,#f1,#66, #61,#fc,#cf,#16, #1f,#ff,#fc,#f1, #ff,#fc,#cc,#f1, #ff,#ff,#ff,#18, #1f,#cf,#f1,#81, #61,#ff,#18,#16
+menicn_about        db 4,8,7:dw $+7,$+4,28:db 5: db #66,#10,#07,#66, #66,#10,#07,#66, #66,#66,#66,#66, #61,#00,#07,#66, #66,#10,#07,#66, #66,#10,#07,#66, #61,#00,#00,#76
+
+;menmaitxtx  db 6,128,-1:dw menicn_null+1:         db " Coming soon...",0
+
+if 0
+menicn_print        db 4,8,7:dw $+7,$+4,28:db 5: db #66,#61,#11,#11, #66,#18,#d8,#16, #61,#8d,#81,#66, #11,#11,#11,#16, #1a,#aa,#0a,#76, #1a,#9a,#9a,#76, #67,#77,#77,#66
+menicn_find         db 4,8,7:dw $+7,$+4,28:db 5: db #66,#16,#61,#66, #61,#71,#17,#16, #61,#71,#17,#16, #17,#71,#17,#71, #18,#16,#61,#81, #17,#16,#61,#71, #11,#16,#61,#11
+menicn_findagain    db 4,8,7:dw $+7,$+4,28:db 5: db #61,#66,#16,#66, #67,#11,#76,#f6, #17,#11,#71,#f6, #18,#11,#81,#f6, #17,#66,#71,#f6, #11,#66,#1f,#ff, #66,#66,#66,#f6
+menicn_replace      db 4,8,7:dw $+7,$+4,28:db 5: db #66,#61,#11,#16, #66,#61,#88,#11, #33,#33,#88,#81, #33,#63,#38,#81, #33,#33,#88,#81, #33,#63,#31,#11, #33,#63,#36,#66
+endif
+
+;context
+ctxclmtxt1  db 6,128,-1:dw menicn_sizcolumn+1:    db " Column width...",0
+ctxclmtxt2  db 6,128,-1:dw menicn_selcolumn+1:    db " Mark this column",0
+ctxclmtxt3  db 6,128,-1:dw menicn_selall+1:       db " Mark column range",0
+ctxclmtxt4  db 6,128,-1:dw menicn_clmright+1:     db " Insert column",0
+ctxclmtxt5  db 6,128,-1:dw menicn_clmleft+1:      db " Remove column",0
+
+ctxrowtxt1  db 6,128,-1:dw menicn_sizrow+1:       db " Row height...",0
+ctxrowtxt2  db 6,128,-1:dw menicn_selrow+1:       db " Mark this row",0
+ctxrowtxt3  db 6,128,-1:dw menicn_selall+1:       db " Mark row range",0
+ctxrowtxt4  db 6,128,-1:dw menicn_rowdown+1:      db " Insert row",0
+ctxrowtxt5  db 6,128,-1:dw menicn_rowup+1:        db " Remove row",0
+
+ctxceltxt1  equ menmaitxt21     ;"Cut"
+ctxceltxt2  equ menmaitxt22     ;"Copy"
+ctxceltxt3  equ menmaitxt23     ;"Paste"
+
+ctxceltxt4  equ menmaitxt51     ;"Insert cell(s)"
+ctxceltxt4a equ menmaitxt511    ;"Move cells down"
+ctxceltxt4b equ menmaitxt512    ;"Move cells right"
+ctxceltxt4c equ menmaitxt513    ;"Insert whole row(s)"
+ctxceltxt4d equ menmaitxt514    ;"Insert whole column(s)"
+
+ctxceltxt5  equ menmaitxt54     ;"Remove cell(s)",0
+ctxceltxt5a equ menmaitxt541    ;"Move cells up",0
+ctxceltxt5b equ menmaitxt542    ;"Move cells left",0
+ctxceltxt5c equ menmaitxt543    ;"Remove whole row(s)",0
+ctxceltxt5d equ menmaitxt544    ;"Remove whole column(s)",0
+
+ctxceltxt6  equ menmaitxt24     ;"Clear cell(s)",0
+ctxceltxt7  db 6,128,-1:dw menicn_fmcell+1:       db " Format cell(s)...",0
 
 
 
@@ -3981,49 +4139,88 @@ prgmsginf   equ 25: dw prgtxtinf1,4*1+2,prgtxtinf2,4*1+2,prgtxtinf3,4*1+2,0,prgi
 ;### PULL DOWN / CONTEXT MENUS ################################################
 ;==============================================================================
 
+;main
+menmaidat   dw 6, 1+4,menmaitxt1, menmaidat1,0
+            dw    1+4,menmaitxt2, menmaidat2,0
+            dw    1+4,menmaitxt3, menmaidat3,0
+            dw    1+4,menmaitxt4, menmaidat4,0
+            dw    1+4,menmaitxt5, menmaidat5,0
+            ;dw    1+4,menmaitxt6, menmaidat6,0
+            dw    1+4,menmaitxt7, menmaidat7,0
+
+menmaidat1  dw 11,17,menmaitxt11,mai_filnew,0, 17,menmaitxt12,mai_filopn,0, 17,menmaitxt13,mai_filsav,0, 17,menmaitxt14,mai_filsas,0, 1+8,0,0,0, 17+4,menmaitxt15,menmaidat15,0, 17+4,menmaitxt16,menmaidat16,0
+            dw 1+8,0,0,0, 17,menmaitxt17,mai_prpopn,0, 1+8,0,0,0, 17,menmaitxt10,mai_prgend0,0
+menmaidat15 dw 2, 17,menmaitxt151,mai_filimc,0,17,menmaitxt152,mai_filims,0
+menmaidat16 dw 2, 17,menmaitxt151,mai_filexc,0,17,menmaitxt152,mai_filexs,0
+
+menmaidat2  dw 8 ,17,menmaitxt21,mai_copcut,0, 17,menmaitxt22,mai_copcop,0
+menmaidat2a dw    16,menmaitxt23,mai_coppst,0, 1+8,0,0,0, 17,menmaitxt24,mai_fldclr,0, 1+8,0,0,0, 17,menmaitxt25,mai_mrkall,0, 17+4,menmaitxt26,menmaidat26,0
+menmaidat26 dw 2, 17,menmaitxt261,mai_mencsl,0,17,menmaitxt262,mai_menrsl,0
+
+menmaidat3  dw 4
+menmaidat30 dw 17+2, menmaitxt31,mai_mentol,0
+menmaidat31 dw 17+2, menmaitxt32,mai_mensta,0, 1+8,0,0,0, 17,menmaitxt33,mai_cfgopn,0
+
+menmaidat4  dw 7, 17+4,menmaitxt41,menmaidat41,0,17+4,menmaitxt42,menmaidat42,0,17+4,menmaitxt43,menmaidat43,0, 1+8,0,0,0, 17,menmaitxt44 ,mai_cfdopn,0,17+4,menmaitxt45,menmaidat45,0,17+4,menmaitxt46,menmaidat46,0
+menmaidat41 dw 3, 17,menmaitxt411,mai_mensnr,0,17,menmaitxt412,mai_mensbl,0,17,menmaitxt413,mai_mensit,0
+menmaidat42 dw 4, 17,menmaitxt421,mai_menagn,0,17,menmaitxt422,mai_menalf,0,17,menmaitxt423,mai_menacn,0, 17,menmaitxt424,mai_menarg,0
+menmaidat43 dw 10,17,menmaitxt431,mai_mennfl,0,17,menmaitxt432,mai_menndt,0,17,menmaitxt433,mai_menntm,0, 17,menmaitxt434,mai_mennpr,0,17,menmaitxt435,mai_mennex,0
+            dw    17,menmaitxt436,mai_mennbl,0,17,menmaitxt437,mai_mennbn,0,17,menmaitxt438,mai_mennhx,0, 17+8,0,0,0, 17,menmaitxt439,mai_mensep,0
+menmaidat45 dw 1, 17,menmaitxt451,mai_mencsz,0
+menmaidat46 dw 1, 17,menmaitxt461,mai_menrsz,0
+
+menmaidat5  dw 9, 17+4,menmaitxt51,menmaidat51,0, 17,menmaitxt52,mai_movrwi,   0, 17,menmaitxt53,mai_movcli,0, 1+8,0,0,0, 17+4,menmaitxt54,menmaidat54,0, 17,menmaitxt55,mai_movrwr,0, 17,menmaitxt56,mai_movclr,0, 1+8,0,0,0, 17,menmaitxt57,mai_fldclr,0
+menmaidat51 dw 4, 17,menmaitxt511, mai_movcid, 0, 17,menmaitxt512, mai_movcir, 0, 17,menmaitxt513, mai_movrwi, 0, 17,menmaitxt514, mai_movcli, 0
+menmaidat54 dw 4, 17,menmaitxt541, mai_movcru, 0, 17,menmaitxt542, mai_movcrl, 0, 17,menmaitxt543, mai_movrwr, 0, 17,menmaitxt544, mai_movclr, 0
+
+;menmaidat6  dw 1, 1,menmaitxtx ,000000,0
+
+menmaidat7  dw 3, 17,menmaitxt71,mai_prghlp,0, 1+8,0,0,0, 17,menmaitxt72,mai_prginf,0
+
+
 ;column bar
 ctxclmdat   dw 7
-dw 1,ctxclmtxt1, barmsc, 0
+dw 17,ctxclmtxt1, barmsc, 0
 dw 8,0,0,0
-dw 1,ctxclmtxt2, barmcs, 0
-dw 1,ctxclmtxt3, barmcm, 0
+dw 17,ctxclmtxt2, barmcs, 0
+dw 17,ctxclmtxt3, barmcm, 0
 dw 8,0,0,0
-dw 1,ctxclmtxt4, barmci, 0
-dw 1,ctxclmtxt5, barmcr, 0
+dw 17,ctxclmtxt4, barmci, 0
+dw 17,ctxclmtxt5, barmcr, 0
 
 ;row bar
 ctxrowdat   dw 7
-dw 1,ctxrowtxt1, barmsr, 0
+dw 17,ctxrowtxt1, barmsr, 0
 dw 8,0,0,0
-dw 1,ctxrowtxt2, barmrs, 0
-dw 1,ctxrowtxt3, barmrm, 0
+dw 17,ctxrowtxt2, barmrs, 0
+dw 17,ctxrowtxt3, barmrm, 0
 dw 8,0,0,0
-dw 1,ctxrowtxt4, barmri, 0
-dw 1,ctxrowtxt5, barmrr, 0
+dw 17,ctxrowtxt4, barmri, 0
+dw 17,ctxrowtxt5, barmrr, 0
 
 ;cells
 ctxceldat   dw 9
-dw 1,ctxceltxt1, cmncut, 0
-dw 1,ctxceltxt2, cmncop, 0
-dw 1,ctxceltxt3, cmnpst, 0
+dw 17,ctxceltxt1, cmncut, 0
+dw 17,ctxceltxt2, cmncop, 0
+dw 17,ctxceltxt3, cmnpst, 0
 dw 8,0,0,0
-dw 5,ctxceltxt4, ctxceldat4, 0
-dw 5,ctxceltxt5, ctxceldat5, 0
-dw 1,ctxceltxt6, cmnclr, 0
+dw 16+5,ctxceltxt4, ctxceldat4, 0
+dw 16+5,ctxceltxt5, ctxceldat5, 0
+dw 17,ctxceltxt6, cmnclr, 0
 dw 8,0,0,0
-dw 1,ctxceltxt7, cmnfmt, 0
+dw 17,ctxceltxt7, cmnfmt, 0
 
 ctxceldat4  dw 4
-dw 1,ctxceltxt4a, cmncid, 0
-dw 1,ctxceltxt4b, cmncir, 0
-dw 1,ctxceltxt4c, cmnrwi, 0
-dw 1,ctxceltxt4d, cmncmi, 0
+dw 17,ctxceltxt4a, cmncid, 0
+dw 17,ctxceltxt4b, cmncir, 0
+dw 17,ctxceltxt4c, cmnrwi, 0
+dw 17,ctxceltxt4d, cmncmi, 0
 
 ctxceldat5  dw 4
-dw 1,ctxceltxt5a, cmncru, 0
-dw 1,ctxceltxt5b, cmncrl, 0
-dw 1,ctxceltxt5c, cmnrwr, 0
-dw 1,ctxceltxt5d, cmncmr, 0
+dw 17,ctxceltxt5a, cmncru, 0
+dw 17,ctxceltxt5b, cmncrl, 0
+dw 17,ctxceltxt5c, cmnrwr, 0
+dw 17,ctxceltxt5d, cmncmr, 0
 
 
 ;==============================================================================

@@ -913,7 +913,7 @@ dw fncwrd10,fncwrd11,fncwrd12,fncwrd13,fncwrd14,fncwrd15,fncwrd16,fncwrd17,fncwr
 dw fncwrd20,fncwrd21,fncwrd22,fncwrd23,fncwrd24,fncwrd25,fncwrd26,fncwrd27,fncwrd28,fncwrd29
 dw fncwrd30,fncwrd31,fncwrd32,fncwrd33,fncwrd34,fncwrd35,fncwrd36,fncwrd37,fncwrd38,fncwrd39
 dw fncwrd40,fncwrd41,fncwrd42,fncwrd43,fncwrd44,fncwrd45,fncwrd46,fncwrd47,fncwrd48,fncwrd49
-dw fncwrd50,fncwrd51,fncwrd52,fncwrd53,fncwrd54
+dw fncwrd50,fncwrd51,fncwrd52,fncwrd53,fncwrd54,fncwrd55,fncwrd56
 dw 0
 
 fncwrd00    db fortokfnc+00,5,"SQRT("
@@ -978,6 +978,8 @@ fncwrd51    db fortokfnc+51,4,"NPV("
 fncwrd52    db fortokfnc+52,5,"FACT("
 fncwrd53    db fortokfnc+53,11,"FACTDOUBLE("
 fncwrd54    db fortokfnc+54,4,"NOT("
+fncwrd55    db fortokfnc+55,4,"NOW("
+fncwrd56    db fortokfnc+56,6,"TICKS("
 
 fnctab
 dw fncsqr,fnclog,fncl10,fncsin,fnccos,fnctan,fncatn,fncexp,fncpi ,fncsgn,fncabs
@@ -989,7 +991,7 @@ dw fncdat,fnctim,fncdtm,fncyea,fncmon,fncday,fncwkd,fncwkn,fnchor,fncmnu,fncsec,
 dw fncyrs,fncmos,fncdys,fnchrs,fncmis,fncscs
 dw fncpv ,fncpmt,fncfv ,fncrat,fncnpr,fncnpv
 dw fncfac,fncfad
-dw fncnot
+dw fncnot,fncnow,fnctik
 
 fncwkn  ;...WEEKNUM
         jp forclcp
@@ -1530,6 +1532,23 @@ fncstd3 ld hl,fncbuf
         db #00,#00,#00,#61,#8c  ;60*60      -> hour
 .FLO_CONST_60
         db #00,#00,#00,#70,#86  ;60         -> minute
+
+;### FNCNOW -> returns current datetime
+;### Parameter  -
+;### Output     datetime
+fncnow  or a:jp nz,fncget1
+        rst #20:dw jmp_timget
+        jr fnctim0
+
+;### FNCTIK -> returns system counter
+;### Parameter  -
+;### Output     counter
+fnctik  or a:jp nz,fncget1
+        ld hl,jmp_mtgcnt:rst #28    ;iy,ix=system counter (31bit value)
+        push ix:pop hl
+        push iy:pop de
+        res 7,d
+        jr fnctim1
 
 ;### FNCDAT -> returns datetime of year,month,day
 ;### Parameter  1=year, 2=month, 3=day

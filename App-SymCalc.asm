@@ -2,9 +2,12 @@
 ;@                                                                            @
 ;@                               S y m C a l c                                @
 ;@                                                                            @
-;@             (c) 2024-2024 by Prodatron / SymbiosiS (Jörn Mika)             @
+;@             (c) 2024-2025 by Prodatron / SymbiosiS (Jörn Mika)             @
 ;@                                                                            @
 ;@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+;select all
+;- sum/avg needs long time, no area optimization?
 
 ;cell texts -> 2nd bank
 ;- cellod3 -> copy from 2nd
@@ -12,7 +15,8 @@
 ;- celrem  -> just delete
 ;- celutx  -> resize mem, copy to 2nd
 ;- mempoi  -> adjust celrec pointer in 1st, celctr pointer in 2nd
-;- maybe move converters to 2nd
+;- move converters to 2nd
+;- recdrw, celbld -> execute in 2nd bank, copy a larger amount of cell data first!
 
 ;glitches
 ;- overlapping cells
@@ -21,6 +25,11 @@
 ;  - scrolling too fast -> forgot to plot some areas
 ;  - bar scroll sometimes messy
 ;- bold/italics no full paper -> missing OS feature
+
+;functions
+;- multiplan lookup (cell range, min number -> result is last cell in found row/column)
+;- multiplan index (x, y, cell range -> result is cell xy in range)
+;- celltype (text, number or error type)
 
 ;bugs
 ;- missing memful/stackoverflow checks in engine etc
@@ -476,7 +485,7 @@ prgprzw dec ixl
         jr z,prgprz7
         ld hl,(App_MsgBuf+8)
         cp DSK_ACT_MENU
-        jr z,prgprz1
+        jp z,prgmen
         cp DSK_ACT_TOOLBAR
         jr z,prgprz1
         cp DSK_ACT_KEY
@@ -584,6 +593,61 @@ keyesc  ld a,(winmaigrp+14)
         call cellod
 keyesc1 call fldfcf
         jp prgprz0
+
+;### PRGMEN -> item in main menu selected
+;### Input      HL=menu item ID
+prgmen  ld bc,prgmentab-2
+        jp jmptab
+prgmentab
+dw filnew  ;mai_filnew  equ 01
+dw filopn  ;mai_filopn  equ 02
+dw filsav  ;mai_filsav  equ 03
+dw filsas  ;mai_filsas  equ 04
+dw filimc  ;mai_filimc  equ 05
+dw filims  ;mai_filims  equ 06
+dw filexc  ;mai_filexc  equ 07
+dw filexs  ;mai_filexs  equ 08
+dw prpopn  ;mai_prpopn  equ 09
+dw prgend0 ;mai_prgend0 equ 10
+dw copcut  ;mai_copcut  equ 11
+dw copcop  ;mai_copcop  equ 12
+dw coppst  ;mai_coppst  equ 13
+dw fldclr  ;mai_fldclr  equ 14
+dw mrkall  ;mai_mrkall  equ 15
+dw mencsl  ;mai_mencsl  equ 16
+dw menrsl  ;mai_menrsl  equ 17
+dw mentol  ;mai_mentol  equ 18
+dw mensta  ;mai_mensta  equ 19
+dw cfgopn  ;mai_cfgopn  equ 20
+dw cfdopn  ;mai_cfdopn  equ 21
+dw mensnr  ;mai_mensnr  equ 22
+dw mensbl  ;mai_mensbl  equ 23
+dw mensit  ;mai_mensit  equ 24
+dw menagn  ;mai_menagn  equ 25
+dw menalf  ;mai_menalf  equ 26
+dw menacn  ;mai_menacn  equ 27
+dw menarg  ;mai_menarg  equ 28
+dw mennfl  ;mai_mennfl  equ 29
+dw menndt  ;mai_menndt  equ 30
+dw menntm  ;mai_menntm  equ 31
+dw mennpr  ;mai_mennpr  equ 32
+dw mennex  ;mai_mennex  equ 33
+dw mennbl  ;mai_mennbl  equ 34
+dw mennbn  ;mai_mennbn  equ 35
+dw mennhx  ;mai_mennhx  equ 36
+dw mensep  ;mai_mensep  equ 37
+dw mencsz  ;mai_mencsz  equ 38
+dw menrsz  ;mai_menrsz  equ 39
+dw movrwi  ;mai_movrwi  equ 40
+dw movcli  ;mai_movcli  equ 41
+dw movrwr  ;mai_movrwr  equ 42
+dw movclr  ;mai_movclr  equ 43
+dw movcid  ;mai_movcid  equ 44
+dw movcir  ;mai_movcir  equ 45
+dw movcru  ;mai_movcru  equ 46
+dw movcrl  ;mai_movcrl  equ 47
+dw prghlp  ;mai_prghlp  equ 48
+dw prginf  ;mai_prginf  equ 49
 
 ;### PRGEND -> End program
 prgend0 call filmod
@@ -1382,7 +1446,9 @@ docclr0 ld hl,-16               ;reset buttons
         ld (mrkflda),hl
         ld (celcntall),hl
         ld (coprngsta),a        ;reset copypaste
-        ld (menmaidat2a),a
+        add 16
+menmaidat2a equ $+1
+        ld hl,menmaidat2a:call ibkbyt
         ld hl,celdatrec         ;reset data
         call docclr1
         ld hl,celtxtrec         ;reset text
@@ -5973,8 +6039,8 @@ copcop  ld a,1
         ld hl,-1
         ld (coprngend),hl
 copcop1 ;...show animation
-        ld a,1
-        ld (menmaidat2a),a
+        ld a,1+16
+        ld hl,(menmaidat2a):call ibkbyt
         jp prgprz0
 copcop2 call mrksrt             ;** range
 copcop3 ld (coprngbeg),hl
@@ -6112,7 +6178,8 @@ coppst9 ld bc,celreclen
 coppstc call coprr0         ;deactivate reference-in-range check
         xor a
         ld (coprngsta),a    ;reset copypaste
-        ld (menmaidat2a),a
+        add 16
+        ld hl,(menmaidat2a):call ibkbyt
         ld hl,(coprngbeg)   ;mark cells, who point to old range
         ld de,(coprngend)
         push de
@@ -6734,7 +6801,9 @@ cfgini  ld hl,cfgprgbeg
 cfginis ld a,(cfgviwsta)
         add a
         inc a
-        ld (1*8+menmaidat3+2),a
+        add 16
+menmaidat31 equ $+1
+        ld hl,menmaidat31:call ibkbyt
         bit 1,a
         ld hl,-40
         ld de,-32
@@ -6751,7 +6820,9 @@ cfgini1 ld (winmaigrp),a
 cfginit ld a,(cfgviwtol)
         add a
         inc a
-        ld (0*8+menmaidat3+2),a
+        add 16
+menmaidat30 equ $+1
+        ld hl,menmaidat30:call ibkbyt
         and 2
         add a:add a
         ld hl,winmaidat+1
@@ -6871,6 +6942,17 @@ ibkini1 push hl
         pop ix
         rst #08
         ;...                    ;##!!## check if too long, if correct etc
+        ret
+
+;### IBKBYT -> sets byte in extended module
+;### Input      A=value, HL=address
+;### Output     HL=HL+1
+;### Destroyed  BC
+ibkbyt  push af
+        ld b,a
+ibkbyt1 ld a,0
+        rst #20:dw jmp_bnkwbt
+        pop af
         ret
 
 ;### IBKLOC -> calls local routine from external module with full register transfer

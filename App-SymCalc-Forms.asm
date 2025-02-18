@@ -18,123 +18,6 @@ docpth      ds 256
 maitittxt   db "untitled - SymCalc",0:ds 12-8
 
 
-;==============================================================================
-;### PULL DOWN / CONTEXT MENUS ################################################
-;==============================================================================
-
-;main
-menmaidat   dw 6, 1+4,menmaitxt1, menmaidat1,0
-            dw    1+4,menmaitxt2, menmaidat2,0
-            dw    1+4,menmaitxt3, menmaidat3,0
-            dw    1+4,menmaitxt4, menmaidat4,0
-            dw    1+4,menmaitxt5, menmaidat5,0
-            ;dw    1+4,menmaitxt6, menmaidat6,0
-            dw    1+4,menmaitxt7, menmaidat7,0
-
-menmaidat1  dw 11,1,menmaitxt11,filnew,0, 1,menmaitxt12,filopn,0, 1,menmaitxt13,filsav,0, 1,menmaitxt14,filsas,0, 1+8,0,0,0, 1+4,menmaitxt15,menmaidat15,0, 1+4,menmaitxt16,menmaidat16,0
-            dw 1+8,0,0,0, 1,menmaitxt17,prpopn,0, 1+8,0,0,0, 1,menmaitxt10,prgend0,0
-menmaidat15 dw 2, 1,menmaitxt151,filimc,0,1,menmaitxt152,filims,0
-menmaidat16 dw 2, 1,menmaitxt151,filexc,0,1,menmaitxt152,filexs,0
-
-menmaidat2  dw 8 ,1,menmaitxt21,copcut,0, 1,menmaitxt22,copcop,0
-menmaidat2a dw    0,menmaitxt23,coppst,0, 1+8,0,0,0, 1,menmaitxt24,fldclr,0, 1+8,0,0,0, 1,menmaitxt25,mrkall,0, 1+4,menmaitxt26,menmaidat26,0
-menmaidat26 dw 2, 1,menmaitxt261,mencsl,0,1,menmaitxt262,menrsl,0
-
-menmaidat3  dw 4, 1+2,menmaitxt31,mentol,0, 1+2,menmaitxt32,mensta,0, 1+8,0,0,0, 1,menmaitxt33,cfgopn,0
-
-menmaidat4  dw 7, 1+4,menmaitxt41,menmaidat41,0,1+4,menmaitxt42,menmaidat42,0,1+4,menmaitxt43,menmaidat43,0, 1+8,0,0,0, 1,menmaitxt44 ,cfdopn,0,1+4,menmaitxt45,menmaidat45,0,1+4,menmaitxt46,menmaidat46,0
-menmaidat41 dw 3, 1,menmaitxt411,mensnr,0,1,menmaitxt412,mensbl,0,1,menmaitxt413,mensit,0
-menmaidat42 dw 4, 1,menmaitxt421,menagn,0,1,menmaitxt422,menalf,0,1,menmaitxt423,menacn,0,1,menmaitxt424,menarg,0
-menmaidat43 dw 10,1,menmaitxt431,mennfl,0,1,menmaitxt432,menndt,0,1,menmaitxt433,menntm,0,1,menmaitxt434,mennpr,0,1,menmaitxt435,mennex,0,1,menmaitxt436,mennbl,0,1,menmaitxt437,mennbn,0,1,menmaitxt438,mennhx,0, 1+8,0,0,0, 1,menmaitxt439,mensep,0
-menmaidat45 dw 1, 1,menmaitxt451,mencsz,0
-menmaidat46 dw 1, 1,menmaitxt461,menrsz,0
-
-menmaidat5  dw 9, 1+4,menmaitxt51,menmaidat51,0, 1,menmaitxt52,movrwi,0, 1,menmaitxt53,movcli,0, 1+8,0,0,0, 1+4,menmaitxt54,menmaidat54,0, 1,menmaitxt55,movrwr,0, 1,menmaitxt56,movclr,0, 1+8,0,0,0, 1,menmaitxt57,fldclr,0
-menmaidat51 dw 4, 1,menmaitxt511, movcid, 0, 1,menmaitxt512, movcir, 0, 1,menmaitxt513, movrwi, 0, 1,menmaitxt514, movcli, 0
-menmaidat54 dw 4, 1,menmaitxt541, movcru, 0, 1,menmaitxt542, movcrl, 0, 1,menmaitxt543, movrwr, 0, 1,menmaitxt544, movclr, 0
-
-;menmaidat6  dw 1, 1,menmaitxtx ,000000,0
-menmaidat7  dw 3, 1,menmaitxt71,prghlp,0, 1+8,0,0,0, 1,menmaitxt72,prginf,0
-
-menmaitxt1  db "File",0
-menmaitxt11 db "New",0
-menmaitxt12 db "Open...",0
-menmaitxt13 db "Save",0
-menmaitxt14 db "Save as...",0
-menmaitxt15 db "Import",0
-menmaitxt151 db "CSV file...",0
-menmaitxt152 db "SYLK file...",0
-menmaitxt16 db "Export",0
-menmaitxt17 db "Properties...",0
-menmaitxt10 db "Exit",0
-
-menmaitxt2  db "Edit",0
-menmaitxt21 db "Cut",0
-menmaitxt22 db "Copy",0
-menmaitxt23 db "Paste",0
-menmaitxt24 db "Clear cell(s)",0
-menmaitxt25 db "Select All",0
-menmaitxt26 db "Select",0
-menmaitxt261 db "Column",0
-menmaitxt262 db "Row",0
-
-menmaitxt3  db "View",0
-menmaitxt31 db "Tool bar",0
-menmaitxt32 db "Status bar",0
-menmaitxt33 db "Preferences...",0
-
-menmaitxt4  db "Format",0
-menmaitxt41 db "Style",0
-menmaitxt411    db "Normal",0
-menmaitxt412    db "Bold",0
-menmaitxt413    db "Italic",0
-menmaitxt42 db "Alignment",0
-menmaitxt421    db "General",0
-menmaitxt422    db "Left",0
-menmaitxt423    db "Centered",0
-menmaitxt424    db "Right",0
-menmaitxt43 db "Number format",0
-menmaitxt431    db "Number",0
-menmaitxt432    db "Date",0
-menmaitxt433    db "Time",0
-menmaitxt434    db "Percentage",0
-menmaitxt435    db "Scientific",0
-menmaitxt436    db "Boolean",0
-menmaitxt437    db "Binary",0
-menmaitxt438    db "Hexadecimal",0
-menmaitxt439    db "1000 separator",0
-menmaitxt44 db "Cells...",0
-menmaitxt45 db "Columns",0
-menmaitxt451    db "Width...",0
-menmaitxt46 db "Rows",0
-menmaitxt461    db "Height...",0
-
-menmaitxt5  db "Table",0
-menmaitxt51 db "Insert cell(s)",0
-menmaitxt511    db "Move cells down",0
-menmaitxt512    db "Move cells right",0
-menmaitxt513    db "Insert whole row(s)",0
-menmaitxt514    db "Insert whole column(s)",0
-menmaitxt52 db "Insert row(s)",0
-menmaitxt53 db "Insert column(s)",0
-menmaitxt54 db "Remove cell(s)",0
-menmaitxt541    db "Move cells up",0
-menmaitxt542    db "Move cells left",0
-menmaitxt543    db "Remove whole row(s)",0
-menmaitxt544    db "Remove whole column(s)",0
-menmaitxt55 db "Remove row(s)",0
-menmaitxt56 db "Remove column(s)",0
-menmaitxt57 db "Clear cell content",0
-
-;menmaitxt6  db "Data",0
-
-menmaitxt7  db "?",0
-menmaitxt71 db "Help topics",0
-menmaitxt72 db "About",0
-
-;menmaitxtx  db "Coming soon...",0
-
-
 ;### ALERT WINDOW #############################################################
 
 errforinf0  equ 00
@@ -187,9 +70,15 @@ ctrbot4 dw txtbot4:db 16*4+1,2+128
 ;### MAIN WINDOW ##############################################################
 ;==============================================================================
 
+menmaidat   equ winmaidat1
+
 windrpnum   db 0    ;dropdown window ID \
 winmaidat           ;                   /
-dw #3f02,3,30,10,248,114,0,0,248,114,248,61,10000,10000,prgicnsml,maitittxt,0,menmaidat,winmaigrp,wintolgrp,17:ds 136+14
+dw #3f02,3,30,10,248,114,0,0,248,114,248,61,10000,10000,prgicnsml,maitittxt,0
+winmaidat1
+dw menmaidat,winmaigrp,wintolgrp:db 17
+winmaidat2
+db 0:ds 136+14
 
 wintolgrp   db 17,0:dw wintolrec,0,0,256*0+0,0,0,2
 
@@ -352,8 +241,10 @@ dw gfxfrma-1
 dw prgalr2+1
 dw ib1cll+1
 dw ib1clx+1
+dw ibkbyt1+1
 dw winmairec2+00+3
 dw winmairec2+16+3
+dw winmaidat2
 pt1bnk0
 
 pt2tab
@@ -371,7 +262,7 @@ dw 5*3+App_BegCode+48+0 ;bnk code
 dw 5*4+App_BegCode+48+0 ;bnk data
 dw 5*5+App_BegCode+48+0 ;bnk trns
 pt2bnk0
-;##!!## remove pt2bnk0-pt1tab from add_trn_mem in header
+;##!!## remove pt2bnk0-pt1tab from add_trn_mem in header, as only needed during INIT
 
 ;*** LAST IN TRANSFER AREA ***
 db 0
